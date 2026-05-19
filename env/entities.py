@@ -2,19 +2,35 @@
 
 from __future__ import annotations
 
+import math
+
 import pygame
 
 from env import constants as C
 
 
 class Player:
-    def __init__(self, x: float, y: float, color: tuple[int, int, int], label: str) -> None:
+    def __init__(
+        self,
+        x: float,
+        y: float,
+        color: tuple[int, int, int],
+        label: str,
+        team: int,
+    ) -> None:
         self.x = x
         self.y = y
         self.color = color
         self.label = label
+        self.team = team
+        self.last_dx = 1.0 if team == 1 else -1.0
+        self.last_dy = 0.0
 
     def move(self, dx: float, dy: float) -> None:
+        if dx or dy:
+            length = math.hypot(dx, dy)
+            self.last_dx = dx / length
+            self.last_dy = dy / length
         self.x += dx
         self.y += dy
         self._clamp_to_field()
@@ -22,6 +38,14 @@ class Player:
     def reset(self, x: float, y: float) -> None:
         self.x = x
         self.y = y
+        self.last_dx = 1.0 if self.team == 1 else -1.0
+        self.last_dy = 0.0
+
+    def facing(self) -> tuple[float, float]:
+        return self.last_dx, self.last_dy
+
+    def distance_to(self, x: float, y: float) -> float:
+        return math.hypot(self.x - x, self.y - y)
 
     def _clamp_to_field(self) -> None:
         min_x = C.FIELD_LEFT + C.PLAYER_RADIUS
@@ -43,10 +67,17 @@ class Ball:
     def __init__(self, x: float, y: float) -> None:
         self.x = x
         self.y = y
+        self.vx = 0.0
+        self.vy = 0.0
 
     def reset(self, x: float, y: float) -> None:
         self.x = x
         self.y = y
+        self.vx = 0.0
+        self.vy = 0.0
+
+    def speed(self) -> float:
+        return math.hypot(self.vx, self.vy)
 
     def draw(self, surface: pygame.Surface) -> None:
         pygame.draw.circle(surface, C.COLOR_BALL, (int(self.x), int(self.y)), C.BALL_RADIUS)

@@ -1,10 +1,10 @@
-"""Shared constants for the NeuroSoccer environment."""
+"""Shared constants for the RLStriker environment."""
 
 # Window
 SCREEN_WIDTH = 960
 SCREEN_HEIGHT = 540
 FPS = 60
-TITLE = "NeuroSoccer — V1"
+TITLE = "RLStriker — V2"
 
 # Pitch layout (playing area inside the window)
 FIELD_MARGIN_X = 40
@@ -28,6 +28,17 @@ PLAYER_RADIUS = 16
 BALL_RADIUS = 9
 PLAYER_SPEED = 5.0
 
+# Physics
+BALL_FRICTION = 0.985
+BALL_BOUNCE = 0.75
+KICK_POWER = 9.0
+PUSH_POWER = 0.35
+MAX_BALL_SPEED = 14.0
+KICK_RANGE = PLAYER_RADIUS + BALL_RADIUS + 4
+
+# Episode
+MAX_STEPS = 1000
+
 # Colors
 COLOR_PITCH = (46, 125, 50)
 COLOR_PITCH_DARK = (40, 110, 44)
@@ -41,7 +52,10 @@ COLOR_UI_BG = (30, 30, 30)
 COLOR_UI_TEXT = (255, 255, 255)
 COLOR_RESET_BTN = (70, 70, 70)
 COLOR_RESET_BTN_HOVER = (100, 100, 100)
+COLOR_OVERLAY = (0, 0, 0, 160)
 
 # UI
 RESET_BUTTON_RECT = (SCREEN_WIDTH - 120, 10, 110, 36)
-HELP_TEXT = "Arrows/WASD: move P1  |  R or Reset: new positions"
+HELP_TEXT = (
+    "P1: WASD + Space kick  |  P2: IJKL + Enter kick  |  R or Reset: new episode"
+)
