@@ -9,6 +9,7 @@ import pygame
 from env import constants as C
 from env.field import Field
 from env.physics import kick_ball, update_physics
+from env.rewards import compute_step_rewards
 from env.rules import MatchState
 from env.state import build_state
 
@@ -51,6 +52,8 @@ class SoccerEnv:
         if self.match.done:
             return self._get_state(), 0.0, 0.0, True, {"note": "Episode is done. Call reset()."}
 
+        prev_ball_x = self.ball.x
+
         move_1 = self._action_to_move(action_1)
         move_2 = self._action_to_move(action_2)
 
@@ -66,7 +69,15 @@ class SoccerEnv:
         info["kick_connected_1"] = kick_connected_1
         info["kick_connected_2"] = kick_connected_2
 
-        reward_1, reward_2 = self._compute_rewards(info)
+        reward_1, reward_2 = compute_step_rewards(
+            self.player_1,
+            self.player_2,
+            self.ball,
+            info,
+            prev_ball_x=prev_ball_x,
+        )
+        info["reward_agent_1"] = reward_1
+        info["reward_agent_2"] = reward_2
         state = self._get_state()
         done = self.match.done
 
@@ -106,14 +117,6 @@ class SoccerEnv:
         if action == ACTION_RIGHT:
             return (C.PLAYER_SPEED, 0.0)
         return (0.0, 0.0)
-
-    def _compute_rewards(self, info: dict[str, Any]) -> tuple[float, float]:
-        scorer = info.get("scorer")
-        if scorer == 1:
-            return 1.0, -1.0
-        if scorer == 2:
-            return -1.0, 1.0
-        return 0.0, 0.0
 
     def _get_state(self) -> list[float]:
         state = build_state(self.player_1, self.player_2, self.ball, self.match.steps)

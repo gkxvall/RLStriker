@@ -60,7 +60,6 @@ def run_episode(
         _, reward_1, reward_2, done, info = env.step(action_1, action_2)
         total_reward_1 += reward_1
         total_reward_2 += reward_2
-        last_info = info
 
         metrics.on_step(env, info)
 
@@ -176,6 +175,7 @@ def main() -> None:
             config={
                 "script": "run_random.py",
                 "agent": "random",
+                "reward_version": "v1",
                 "episodes": args.episodes,
                 "max_steps": C.MAX_STEPS,
                 "epsilon": args.epsilon,

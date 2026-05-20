@@ -1,22 +1,33 @@
 # RLStriker
 
-RLStriker is a 2D 1v1 soccer reinforcement learning environment built with Python and Pygame. It supports real-time visualization, fast headless simulation, and structured training run logs for later analysis.
+RLStriker is a 2D 1v1 soccer reinforcement learning environment built with Python and Pygame. It supports real-time visualization, fast headless simulation, shaped rewards for training, and structured run logs under `data/training_runs/`.
 
-**Current release: V5**
+**Current release: V6**
 
 ## Features
 
 - Playable pitch with two players, one ball, and goals
 - Physics: ball friction, player–ball collision, kick
-- Rules: goal detection, cumulative score, episode limit (`MAX_STEPS` in `env/constants.py`)
-- Gym-style API: `SoccerEnv` with `reset`, `step`, `render`, and `close`
-- Random baseline agents and an automated runner
-- **Episode logging**: each training run writes `config.json`, `episodes.csv`, and optional `steps.csv` under `data/training_runs/`
+- Rules: goal detection, cumulative score, episode step limit
+- Gym-style API: `SoccerEnv` (`reset`, `step`, `render`, `close`)
+- **Reward shaping V1** (see below)
+- Random baseline agents and automated self-play with CSV logging
+
+## Reward shaping (V6)
+Each environment step applies these rewards (see `env/rewards.py`):
+| Signal | Agent 1 | Agent 2 |
+|--------|---------|---------|
+| Score a goal | +100 | — |
+| Concede a goal | −100 | — |
+| Touch the ball | +2 | +2 |
+| Ball moves toward **opponent** goal | +0.2 | +0.2 |
+| Time (every step) | −0.01 | −0.01 |
+Team 1 attacks the **right** goal; team 2 attacks the **left** goal. Episode totals are summed into `total_reward_agent_1` and `total_reward_agent_2` in `episodes.csv`.
 
 ## Requirements
 
 - Python 3.10+
-- Pygame 2.5+ (see `requirements.txt`)
+- Pygame 2.5+ (`requirements.txt`)
 
 ## Installation
 
@@ -28,7 +39,7 @@ pip install -r requirements.txt
 
 ## Usage
 
-### Manual play (window)
+### Manual play
 
 ```bash
 python main.py
@@ -36,18 +47,12 @@ python main.py
 
 | Team | Move | Kick |
 |------|------|------|
-| Blue (agent 1) | `WASD` or arrow keys | `Space` |
+| Blue (agent 1) | `WASD` / arrow keys | `Space` |
 | Red (agent 2) | `I` `J` `K` `L` | `Enter` |
 
-Use `R` or the **Reset** button to start a new episode.
+Reset episode: `R` or **Reset** button.
 
-### Random self-play (with logging)
-
-Each run creates a folder:
-
-`data/training_runs/run_YYYYMMDD_HHMMSS/`
-
-(or a custom name via `--run-name`).
+### Random self-play + logging
 
 ```bash
 python run_random.py --episodes 100
@@ -55,37 +60,28 @@ python run_random.py --episodes 100
 
 | Flag | Description |
 |------|-------------|
-| `--run-name NAME` | Folder name under `data/training_runs/` |
-| `--log-steps` | Also write `steps.csv` (large files over long runs) |
-| `--epsilon FLOAT` | Value stored in `episodes.csv` (default `1.0` for random agents) |
-| `--render` | Show the match in a window |
-| `--no-log` | Skip writing log files |
+| `--run-name NAME` | Output folder under `data/training_runs/` |
+| `--log-steps` | Write optional `steps.csv` (per-step rewards included) |
+| `--epsilon FLOAT` | Logged in `episodes.csv` (exploration rate for future DQN runs) |
+| `--render` | Open Pygame window |
+| `--no-log` | Disable file output |
 
-Example with optional step log:
+Example:
 
 ```bash
-python run_random.py --episodes 50 --run-name my_baseline --log-steps
+python run_random.py --episodes 50 --run-name random_v6_baseline
 ```
 
-### Logged files
+### Training run output
 
-| File | Description |
-|------|-------------|
-| `config.json` | Run settings (episodes, `max_steps`, `epsilon`, flags, etc.) |
-| `episodes.csv` | One row per episode with metrics (winner, rewards, touches, kicks, distances, …) |
-| `steps.csv` | Optional per-step state and actions (only with `--log-steps`) |
+```
+data/training_runs/<run_name>/
+├── config.json      # includes reward_version: "v1"
+├── episodes.csv     # total_reward_agent_1 / total_reward_agent_2 per episode
+└── steps.csv        # optional (--log-steps)
+```
 
 ## Environment API
-
-`SoccerEnv` lives in `env/soccer_env.py`.
-
-- `reset() -> state`
-- `step(action_1, action_2) -> state, reward_1, reward_2, done, info`
-- `render()` / `close()`
-
-Discrete actions: `0` stay, `1` up, `2` down, `3` left, `4` right, `5` kick.
-
-Headless loop example:
 
 ```python
 import random
@@ -93,32 +89,38 @@ from env.soccer_env import SoccerEnv, ACTION_SPACE_SIZE
 
 env = SoccerEnv(render_mode=None)
 env.reset()
+
+total_r1 = total_r2 = 0.0
 for _ in range(5000):
     a1 = random.randrange(ACTION_SPACE_SIZE)
     a2 = random.randrange(ACTION_SPACE_SIZE)
-    _, _, _, done, _ = env.step(a1, a2)
+    _, r1, r2, done, info = env.step(a1, a2)
+    total_r1 += r1
+    total_r2 += r2
     if done:
         env.reset()
+
 env.close()
 ```
 
-## Repository layout
+Actions: `0` stay, `1` up, `2` down, `3` left, `4` right, `5` kick.
+
+## Project structure
 
 ```text
 RLStriker/
 ├── agents/
-│   ├── __init__.py
 │   └── random_agent.py
 ├── env/
 │   ├── constants.py
 │   ├── entities.py
 │   ├── field.py
 │   ├── physics.py
+│   ├── rewards.py 
 │   ├── rules.py
 │   ├── soccer_env.py
 │   └── state.py
 ├── logging_utils/
-│   ├── __init__.py
 │   ├── episode_logger.py
 │   └── metrics.py
 ├── data/
@@ -131,7 +133,7 @@ RLStriker/
 
 ## Roadmap
 
-Planned next steps: richer reward shaping, DQN training, plotting scripts, curriculum and self-play, demo and human-vs-AI modes.
+Next: DQN agent (V7), training plots (V8), curriculum and self-play, demo and human-vs-AI modes.
 
 ## License
 
