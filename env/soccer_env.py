@@ -54,13 +54,17 @@ class SoccerEnv:
         move_1 = self._action_to_move(action_1)
         move_2 = self._action_to_move(action_2)
 
+        kick_connected_1 = False
+        kick_connected_2 = False
         if action_1 == ACTION_KICK:
-            kick_ball(self.player_1, self.ball)
+            kick_connected_1 = kick_ball(self.player_1, self.ball)
         if action_2 == ACTION_KICK:
-            kick_ball(self.player_2, self.ball)
+            kick_connected_2 = kick_ball(self.player_2, self.ball)
 
         update_physics(self.players, self.ball, [move_1, move_2])
         info = self.match.step_after_physics(self.ball)
+        info["kick_connected_1"] = kick_connected_1
+        info["kick_connected_2"] = kick_connected_2
 
         reward_1, reward_2 = self._compute_rewards(info)
         state = self._get_state()
