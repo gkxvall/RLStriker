@@ -1,4 +1,4 @@
-"""Gym-style soccer environment for RLStriker V3."""
+"""Gym-style soccer environment for RLStriker."""
 
 from __future__ import annotations
 

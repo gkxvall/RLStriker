@@ -1,4 +1,4 @@
-"""RLStriker V3 — main app powered by SoccerEnv."""
+"""Manual RLStriker app powered by SoccerEnv."""
 
 from __future__ import annotations
 

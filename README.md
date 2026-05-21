@@ -1,122 +1,216 @@
 # RLStriker
 
-RLStriker is a 2D 1v1 soccer reinforcement learning environment built with Python and Pygame. It supports real-time visualization, fast headless simulation, shaped rewards for training, and structured run logs under `data/training_runs/`.
+RLStriker is a 2D 1v1 soccer reinforcement learning environment built with Python, Pygame, and PyTorch.
 
-**Current release: V6**
+The project is being built version by version. The current version is **V7**, which adds a basic DQN training pipeline on top of the existing Pygame environment, physics, rewards, random agents, and CSV logging.
 
-## Features
+## Current Features
 
-- Playable pitch with two players, one ball, and goals
-- Physics: ball friction, player–ball collision, kick
-- Rules: goal detection, cumulative score, episode step limit
-- Gym-style API: `SoccerEnv` (`reset`, `step`, `render`, `close`)
-- **Reward shaping V1** (see below)
-- Random baseline agents and automated self-play with CSV logging
+- Pygame soccer pitch with two players, one ball, and two goals
+- Manual keyboard control for both players
+- Ball physics: friction, wall bounce, player collision, and kick action
+- Episode rules: goal detection, score tracking, max-step termination
+- Gym-style environment API: `reset()`, `step()`, `render()`, `close()`
+- Headless simulation for faster training
+- Random baseline agents
+- Episode-level CSV logging and optional step-level CSV logging
+- Reward shaping V1
+- DQN agent with:
+  - PyTorch Q-network
+  - Replay buffer
+  - Target network
+  - Epsilon-greedy exploration
+  - Checkpoint saving
 
-## Reward shaping (V6)
-Each environment step applies these rewards (see `env/rewards.py`):
-| Signal | Agent 1 | Agent 2 |
-|--------|---------|---------|
-| Score a goal | +100 | — |
-| Concede a goal | −100 | — |
-| Touch the ball | +2 | +2 |
-| Ball moves toward **opponent** goal | +0.2 | +0.2 |
-| Time (every step) | −0.01 | −0.01 |
-Team 1 attacks the **right** goal; team 2 attacks the **left** goal. Episode totals are summed into `total_reward_agent_1` and `total_reward_agent_2` in `episodes.csv`.
+## Project Status
 
-## Requirements
+| Version | Status | Summary |
+| --- | --- | --- |
+| V1 | Done | Basic Pygame soccer field |
+| V2 | Done | Physics, kicking, goals, score, episode timer |
+| V3 | Done | Gym-style environment |
+| V4 | Done | Random agents |
+| V5 | Done | Episode logging |
+| V6 | Done | Simple reward shaping |
+| V7 | Done | Basic DQN training pipeline |
 
-- Python 3.10+
-- Pygame 2.5+ (`requirements.txt`)
+Next planned version: **V8 - Training dashboard graphs**.
 
 ## Installation
 
 ```bash
 git clone https://github.com/gkxvall/RLStriker.git
 cd RLStriker
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Usage
+On Windows:
 
-### Manual play
+```bash
+.venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+## Manual Play
 
 ```bash
 python main.py
 ```
 
-| Team | Move | Kick |
-|------|------|------|
-| Blue (agent 1) | `WASD` / arrow keys | `Space` |
-| Red (agent 2) | `I` `J` `K` `L` | `Enter` |
+Controls:
 
-Reset episode: `R` or **Reset** button.
+| Player | Move | Kick |
+| --- | --- | --- |
+| Blue / agent 1 | `WASD` or arrow keys | `Space` |
+| Red / agent 2 | `I J K L` | `Enter` |
 
-### Random self-play + logging
+Reset the episode with `R` or the reset button.
+
+## Random Self-Play
+
+Run two random agents and save episode logs:
 
 ```bash
 python run_random.py --episodes 100
 ```
 
-| Flag | Description |
-|------|-------------|
-| `--run-name NAME` | Output folder under `data/training_runs/` |
-| `--log-steps` | Write optional `steps.csv` (per-step rewards included) |
-| `--epsilon FLOAT` | Logged in `episodes.csv` (exploration rate for future DQN runs) |
-| `--render` | Open Pygame window |
-| `--no-log` | Disable file output |
-
-Example:
+Useful options:
 
 ```bash
 python run_random.py --episodes 50 --run-name random_v6_baseline
+python run_random.py --episodes 10 --render
+python run_random.py --episodes 10 --log-steps
 ```
 
-### Training run output
+## DQN Training
 
+Train a DQN agent against a random opponent:
+
+```bash
+python train.py --episodes 500
 ```
+
+Train agent 2 instead of agent 1:
+
+```bash
+python train.py --episodes 500 --train-agent 2
+```
+
+Render training visually:
+
+```bash
+python train.py --episodes 20 --render
+```
+
+Use a custom run name:
+
+```bash
+python train.py --episodes 1000 --run-name dqn_agent1_v7
+```
+
+Useful training options:
+
+| Option | Default | Description |
+| --- | ---: | --- |
+| `--episodes` | `500` | Number of episodes |
+| `--train-agent` | `1` | Which side learns, `1` or `2` |
+| `--checkpoint-every` | `100` | Save a model every N episodes |
+| `--learning-rate` | `0.001` | Adam learning rate |
+| `--gamma` | `0.99` | Discount factor |
+| `--epsilon-start` | `1.0` | Initial exploration rate |
+| `--epsilon-min` | `0.05` | Minimum exploration rate |
+| `--epsilon-decay` | `0.995` | Episode-level epsilon decay |
+| `--batch-size` | `64` | Replay batch size |
+| `--buffer-size` | `50000` | Replay memory capacity |
+| `--log-steps` | off | Save optional `steps.csv` |
+| `--render` | off | Open the Pygame window |
+
+## Output Data
+
+Every logged run creates a folder under:
+
+```text
 data/training_runs/<run_name>/
-├── config.json      # includes reward_version: "v1"
-├── episodes.csv     # total_reward_agent_1 / total_reward_agent_2 per episode
-└── steps.csv        # optional (--log-steps)
 ```
+
+Example V7 training output:
+
+```text
+data/training_runs/run_YYYYMMDD_HHMMSS/
+├── config.json
+├── episodes.csv
+├── steps.csv              # optional, only with --log-steps
+└── checkpoints/
+    ├── episode_000100.pt
+    ├── episode_000200.pt
+    └── final.pt
+```
+
+`episodes.csv` includes episode length, winner, scores, goals, touches, kicks, steals, average distance to ball, total rewards, epsilon, and timestamp.
+
+## Reward Shaping V1
+
+The current reward function is intentionally simple:
+
+| Event | Reward |
+| --- | ---: |
+| Score a goal | `+100` |
+| Concede a goal | `-100` |
+| Touch the ball | `+2` |
+| Ball moves toward opponent goal | `+0.2` |
+| Every step | `-0.01` |
+
+Team 1 attacks the right goal. Team 2 attacks the left goal.
 
 ## Environment API
 
 ```python
-import random
-from env.soccer_env import SoccerEnv, ACTION_SPACE_SIZE
+from env.soccer_env import ACTION_SPACE_SIZE, SoccerEnv
+from agents.random_agent import RandomAgent
 
 env = SoccerEnv(render_mode=None)
-env.reset()
+agent_1 = RandomAgent()
+agent_2 = RandomAgent()
 
-total_r1 = total_r2 = 0.0
-for _ in range(5000):
-    a1 = random.randrange(ACTION_SPACE_SIZE)
-    a2 = random.randrange(ACTION_SPACE_SIZE)
-    _, r1, r2, done, info = env.step(a1, a2)
-    total_r1 += r1
-    total_r2 += r2
-    if done:
-        env.reset()
+state = env.reset()
+done = False
+
+while not done:
+    action_1 = agent_1.act()
+    action_2 = agent_2.act()
+    state, reward_1, reward_2, done, info = env.step(action_1, action_2)
 
 env.close()
 ```
 
-Actions: `0` stay, `1` up, `2` down, `3` left, `4` right, `5` kick.
+Actions:
 
-## Project structure
+| ID | Action |
+| ---: | --- |
+| `0` | Stay |
+| `1` | Up |
+| `2` | Down |
+| `3` | Left |
+| `4` | Right |
+| `5` | Kick |
+
+## Repository Structure
 
 ```text
 RLStriker/
 ├── agents/
-│   └── random_agent.py
+│   ├── dqn_agent.py
+│   ├── model.py
+│   ├── random_agent.py
+│   └── replay_buffer.py
 ├── env/
 │   ├── constants.py
 │   ├── entities.py
 │   ├── field.py
 │   ├── physics.py
-│   ├── rewards.py 
+│   ├── rewards.py
 │   ├── rules.py
 │   ├── soccer_env.py
 │   └── state.py
@@ -124,17 +218,26 @@ RLStriker/
 │   ├── episode_logger.py
 │   └── metrics.py
 ├── data/
-│   └── training_runs/     # created at runtime (gitignored)
+│   └── training_runs/
 ├── main.py
 ├── run_random.py
+├── train.py
 ├── requirements.txt
 └── README.md
 ```
 
-## Roadmap
+## Development Roadmap
 
-Next: DQN agent (V7), training plots (V8), curriculum and self-play, demo and human-vs-AI modes.
+- V8: Generate training graphs from saved CSV files
+- V9: Curriculum learning
+- V10: Better state representation
+- V11: Self-play against older checkpoints
+- V12: More detailed soccer rewards and reward components
+- V13: Demo mode for trained models
+- V14: Human vs AI mode
+- V15: Multi-agent 2v2 expansion
+- V16: Final portfolio polish
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
