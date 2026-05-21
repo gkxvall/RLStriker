@@ -2,7 +2,7 @@
 
 RLStriker is a 2D 1v1 soccer reinforcement learning environment built with Python, Pygame, PyTorch, pandas, and matplotlib.
 
-The project is being built version by version. The current version is **V8**, which adds graph generation from saved training runs on top of the existing environment, rewards, logging, random agents, and DQN training pipeline.
+The project is being built version by version. The current version is **V9**, which adds curriculum learning on top of the existing environment, rewards, logging, random agents, DQN training pipeline, and graph generation tools.
 
 ![RLStriker Pygame preview](assets/preview.png)
 
@@ -24,6 +24,7 @@ The project is being built version by version. The current version is **V8**, wh
   - Epsilon-greedy exploration
   - Checkpoint saving
 - Training analysis scripts that generate PNG graphs from `episodes.csv`
+- Curriculum learning stages for easier DQN skill progression
 
 ## Project Status
 
@@ -37,8 +38,9 @@ The project is being built version by version. The current version is **V8**, wh
 | V6 | Done | Simple reward shaping |
 | V7 | Done | Basic DQN training pipeline |
 | V8 | Done | Training dashboard graphs |
+| V9 | Done | Curriculum learning |
 
-Next planned version: **V9 - Curriculum learning**.
+Next planned version: **V10 - Better state representation**.
 
 ## Installation
 
@@ -114,6 +116,18 @@ Use a custom run name:
 python train.py --episodes 1000 --run-name dqn_agent1_v7
 ```
 
+Train with the V9 curriculum:
+
+```bash
+python train.py --episodes 1000 --curriculum --run-name curriculum_agent1_v9
+```
+
+Use custom episode counts for the five curriculum stages:
+
+```bash
+python train.py --episodes 1000 --curriculum --curriculum-stage-episodes 100,150,200,250,300
+```
+
 Useful training options:
 
 | Option | Default | Description |
@@ -128,8 +142,24 @@ Useful training options:
 | `--epsilon-decay` | `0.995` | Episode-level epsilon decay |
 | `--batch-size` | `64` | Replay batch size |
 | `--buffer-size` | `50000` | Replay memory capacity |
+| `--curriculum` | off | Enable V9 curriculum learning |
+| `--curriculum-stage-episodes` | split evenly | Episode counts for the five curriculum stages |
 | `--log-steps` | off | Save optional `steps.csv` |
 | `--render` | off | Open the Pygame window |
+
+## Curriculum Learning
+
+V9 adds an optional staged training path. The goal is to teach the agent small soccer skills before asking it to survive a full match.
+
+| Stage | Name | Opponent | Training focus |
+| ---: | --- | --- | --- |
+| 1 | Reach the Ball | None | Move toward the ball and touch it |
+| 2 | Push Toward Goal | None | Touch the ball and move it toward the opponent goal |
+| 3 | Score Goals | None | Use normal goal rewards with scoring enabled |
+| 4 | Weak Random Opponent | Weak random | Add light pressure from an opponent |
+| 5 | Self-Play Mirror | Current model | Play against the learner's current policy |
+
+Curriculum runs still write the same `episodes.csv`, checkpoints, and optional `steps.csv` files. The run `config.json` includes the full curriculum schedule.
 
 ## Training Graphs
 
@@ -216,7 +246,7 @@ Every logged run creates a folder under:
 data/training_runs/<run_name>/
 ```
 
-Example V8 training output:
+Example V9 training output:
 
 ```text
 data/training_runs/run_YYYYMMDD_HHMMSS/
@@ -312,6 +342,9 @@ RLStriker/
 │   ├── plot_rewards.py
 │   ├── plot_touches.py
 │   └── plot_winrate.py
+├── curriculum/
+│   ├── curriculum_manager.py
+│   └── stages.py
 ├── data/
 │   └── training_runs/
 ├── main.py
@@ -323,7 +356,6 @@ RLStriker/
 
 ## Development Roadmap
 
-- V9: Curriculum learning
 - V10: Better state representation
 - V11: Self-play against older checkpoints
 - V12: More detailed soccer rewards and reward components

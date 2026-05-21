@@ -107,6 +107,9 @@ class SoccerEnv:
             pygame.quit()
             self.screen = None
 
+    def get_state(self) -> list[float]:
+        return self._get_state()
+
     def _action_to_move(self, action: int) -> tuple[float, float]:
         if action == ACTION_UP:
             return (0.0, -C.PLAYER_SPEED)
