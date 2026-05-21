@@ -4,7 +4,7 @@
 SCREEN_WIDTH = 960
 SCREEN_HEIGHT = 540
 FPS = 60
-TITLE = "RLStriker — V7"
+TITLE = "RLStriker — V8"
 
 # Pitch layout (playing area inside the window)
 FIELD_MARGIN_X = 40

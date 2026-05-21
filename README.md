@@ -1,8 +1,10 @@
 # RLStriker
 
-RLStriker is a 2D 1v1 soccer reinforcement learning environment built with Python, Pygame, and PyTorch.
+RLStriker is a 2D 1v1 soccer reinforcement learning environment built with Python, Pygame, PyTorch, pandas, and matplotlib.
 
-The project is being built version by version. The current version is **V7**, which adds a basic DQN training pipeline on top of the existing Pygame environment, physics, rewards, random agents, and CSV logging.
+The project is being built version by version. The current version is **V8**, which adds graph generation from saved training runs on top of the existing environment, rewards, logging, random agents, and DQN training pipeline.
+
+![RLStriker Pygame preview](assets/preview.png)
 
 ## Current Features
 
@@ -21,6 +23,7 @@ The project is being built version by version. The current version is **V7**, wh
   - Target network
   - Epsilon-greedy exploration
   - Checkpoint saving
+- Training analysis scripts that generate PNG graphs from `episodes.csv`
 
 ## Project Status
 
@@ -33,8 +36,9 @@ The project is being built version by version. The current version is **V7**, wh
 | V5 | Done | Episode logging |
 | V6 | Done | Simple reward shaping |
 | V7 | Done | Basic DQN training pipeline |
+| V8 | Done | Training dashboard graphs |
 
-Next planned version: **V8 - Training dashboard graphs**.
+Next planned version: **V9 - Curriculum learning**.
 
 ## Installation
 
@@ -127,6 +131,83 @@ Useful training options:
 | `--log-steps` | off | Save optional `steps.csv` |
 | `--render` | off | Open the Pygame window |
 
+## Training Graphs
+
+Generate all V8 graphs for a saved run:
+
+```bash
+python -m analysis.plot_all --run-dir data/training_runs/dqn_agent1_v7
+```
+
+By default, plots are saved to:
+
+```text
+data/training_runs/<run_name>/plots/
+```
+
+Generated files:
+
+```text
+plots/
+├── rewards.png
+├── winrate.png
+├── goals.png
+├── touches.png
+├── distance_to_ball.png
+├── episode_length.png
+└── epsilon.png
+```
+
+You can run individual plot scripts too:
+
+```bash
+python -m analysis.plot_rewards --run-dir data/training_runs/dqn_agent1_v7
+python -m analysis.plot_goals --run-dir data/training_runs/dqn_agent1_v7
+python -m analysis.plot_winrate --run-dir data/training_runs/dqn_agent1_v7
+python -m analysis.plot_touches --run-dir data/training_runs/dqn_agent1_v7
+```
+
+Useful graph options:
+
+| Option | Default | Description |
+| --- | ---: | --- |
+| `--run-dir` | required | Folder containing `episodes.csv` |
+| `--output-dir` | `<run-dir>/plots` | Where PNG files are saved |
+| `--window` | `100` | Rolling average window |
+| `--show` | off | Open an interactive matplotlib window |
+
+## First Training Run Visualization
+
+These charts come from the first DQN training run saved as `agent1`. They are included in `assets/plots/agent1/` so they render directly on GitHub.
+
+### Rewards
+
+![Agent 1 reward training plot](assets/plots/agent1/rewards.png)
+
+### Win Rate
+
+![Agent 1 win rate training plot](assets/plots/agent1/winrate.png)
+
+### Goals
+
+![Agent 1 goals training plot](assets/plots/agent1/goals.png)
+
+### Ball Touches
+
+![Agent 1 ball touches training plot](assets/plots/agent1/touches.png)
+
+### Distance to Ball
+
+![Agent 1 average distance to ball training plot](assets/plots/agent1/distance_to_ball.png)
+
+### Episode Length
+
+![Agent 1 episode length training plot](assets/plots/agent1/episode_length.png)
+
+### Epsilon Decay
+
+![Agent 1 epsilon decay training plot](assets/plots/agent1/epsilon.png)
+
 ## Output Data
 
 Every logged run creates a folder under:
@@ -135,17 +216,25 @@ Every logged run creates a folder under:
 data/training_runs/<run_name>/
 ```
 
-Example V7 training output:
+Example V8 training output:
 
 ```text
 data/training_runs/run_YYYYMMDD_HHMMSS/
 ├── config.json
 ├── episodes.csv
 ├── steps.csv              # optional, only with --log-steps
-└── checkpoints/
-    ├── episode_000100.pt
-    ├── episode_000200.pt
-    └── final.pt
+├── checkpoints/
+│   ├── episode_000100.pt
+│   ├── episode_000200.pt
+│   └── final.pt
+└── plots/
+    ├── rewards.png
+    ├── winrate.png
+    ├── goals.png
+    ├── touches.png
+    ├── distance_to_ball.png
+    ├── episode_length.png
+    └── epsilon.png
 ```
 
 `episodes.csv` includes episode length, winner, scores, goals, touches, kicks, steals, average distance to ball, total rewards, epsilon, and timestamp.
@@ -217,6 +306,12 @@ RLStriker/
 ├── logging_utils/
 │   ├── episode_logger.py
 │   └── metrics.py
+├── analysis/
+│   ├── plot_all.py
+│   ├── plot_goals.py
+│   ├── plot_rewards.py
+│   ├── plot_touches.py
+│   └── plot_winrate.py
 ├── data/
 │   └── training_runs/
 ├── main.py
@@ -228,7 +323,6 @@ RLStriker/
 
 ## Development Roadmap
 
-- V8: Generate training graphs from saved CSV files
 - V9: Curriculum learning
 - V10: Better state representation
 - V11: Self-play against older checkpoints
