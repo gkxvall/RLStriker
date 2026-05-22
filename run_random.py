@@ -175,7 +175,7 @@ def main() -> None:
             config={
                 "script": "run_random.py",
                 "agent": "random",
-                "reward_version": "v1",
+                "reward_version": "v2",
                 "episodes": args.episodes,
                 "max_steps": C.MAX_STEPS,
                 "epsilon": args.epsilon,

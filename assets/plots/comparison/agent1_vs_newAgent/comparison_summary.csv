@@ -1,0 +1,3 @@
+run,label,episodes,version,reward_version,state_size,opponent,train_agent,last100_reward,last100_winrate,last100_goals,last100_touches,last100_kicks,last100_steals,last100_distance_to_ball,last100_episode_length,final_epsilon
+agent1,"agent1 (V7, reward v1, random)",1000,V7,v1,9,random,1,73.66869999999984,0.54,0.54,1.65,0.06,0.01,171.936134,554.33,0.05
+newAgent,"newAgent (V12, reward v2, self-play)",1000,V12,v2,18,checkpoint_self_play,1,158.10820000000277,0.07,0.07,0.75,0.13,0.0,202.49130499999998,925.31,0.05

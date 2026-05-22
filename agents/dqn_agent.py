@@ -1,4 +1,4 @@
-"""DQN agent implementation for RLStriker V7."""
+"""DQN agent implementation for RLStriker."""
 
 from __future__ import annotations
 

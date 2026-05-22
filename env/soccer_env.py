@@ -55,6 +55,10 @@ class SoccerEnv:
             return self._get_state(), 0.0, 0.0, True, {"note": "Episode is done. Call reset()."}
 
         prev_ball_x = self.ball.x
+        prev_ball_y = self.ball.y
+        prev_distance_to_ball_1 = self.player_1.distance_to(self.ball.x, self.ball.y)
+        prev_distance_to_ball_2 = self.player_2.distance_to(self.ball.x, self.ball.y)
+        previous_touch_owner = self.last_touch_owner
 
         move_1 = self._action_to_move(action_1)
         move_2 = self._action_to_move(action_2)
@@ -73,15 +77,24 @@ class SoccerEnv:
         info["kick_connected_2"] = kick_connected_2
         info["last_touch_owner"] = self.last_touch_owner
 
-        reward_1, reward_2 = compute_step_rewards(
+        reward_1, reward_2, reward_components = compute_step_rewards(
             self.player_1,
             self.player_2,
             self.ball,
             info,
             prev_ball_x=prev_ball_x,
+            prev_ball_y=prev_ball_y,
+            prev_distance_to_ball_1=prev_distance_to_ball_1,
+            prev_distance_to_ball_2=prev_distance_to_ball_2,
+            previous_touch_owner=previous_touch_owner,
+            action_1=action_1,
+            action_2=action_2,
+            move_1=move_1,
+            move_2=move_2,
         )
         info["reward_agent_1"] = reward_1
         info["reward_agent_2"] = reward_2
+        info["reward_components"] = reward_components
         state = self._get_state()
         done = self.match.done
 

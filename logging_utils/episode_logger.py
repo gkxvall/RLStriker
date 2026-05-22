@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from env.rewards import COMPONENT_KEYS
 from logging_utils.metrics import EpisodeMetricsRow
 
 EPISODE_FIELDNAMES = [
@@ -30,6 +31,8 @@ EPISODE_FIELDNAMES = [
     "steals_agent_2",
     "avg_distance_to_ball_agent_1",
     "avg_distance_to_ball_agent_2",
+    *(f"{key}_agent_1" for key in COMPONENT_KEYS),
+    *(f"{key}_agent_2" for key in COMPONENT_KEYS),
     "epsilon",
     "timestamp",
 ]

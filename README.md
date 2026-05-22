@@ -2,7 +2,7 @@
 
 RLStriker is a 2D 1v1 soccer reinforcement learning environment built with Python, Pygame, PyTorch, pandas, and matplotlib.
 
-The project is being built version by version. The current version is **V10**, which adds a richer state representation on top of the existing environment, rewards, logging, random agents, DQN training pipeline, graph generation tools, and curriculum learning.
+The project is being built version by version. The current version is **V12**, which adds soccer-specific reward shaping and reward component logging on top of the existing environment, DQN training pipeline, graph generation tools, curriculum learning, richer V10 state representation, and V11 checkpoint self-play.
 
 ![RLStriker Pygame preview](assets/preview.png)
 
@@ -16,7 +16,7 @@ The project is being built version by version. The current version is **V10**, w
 - Headless simulation for faster training
 - Random baseline agents
 - Episode-level CSV logging and optional step-level CSV logging
-- Reward shaping V1
+- Reward shaping V2 with component-level debugging
 - DQN agent with:
   - PyTorch Q-network
   - Replay buffer
@@ -26,6 +26,8 @@ The project is being built version by version. The current version is **V10**, w
 - Training analysis scripts that generate PNG graphs from `episodes.csv`
 - Curriculum learning stages for easier DQN skill progression
 - V10 state vector with distance, angle, goal-distance, ball-direction, and last-touch features
+- V11 self-play against older checkpoint opponents and random baselines
+- V12 reward components for goals, touches, progress, steals, useful kicks, positioning, energy, own-goal pushes, and unnecessary kicks
 
 ## Project Status
 
@@ -41,8 +43,10 @@ The project is being built version by version. The current version is **V10**, w
 | V8      | Done   | Training dashboard graphs                     |
 | V9      | Done   | Curriculum learning                           |
 | V10     | Done   | Better state representation                   |
+| V11     | Done   | Checkpoint self-play                          |
+| V12     | Done   | Better rewards and reward components          |
 
-Next planned version: **V11 - Self-play against older checkpoints**.
+Next planned version: **V13 - Demo mode**.
 
 ## Installation
 
@@ -130,6 +134,18 @@ Use custom episode counts for the five curriculum stages:
 python train.py --episodes 1000 --curriculum --curriculum-stage-episodes 100,150,200,250,300
 ```
 
+Train with checkpoint self-play:
+
+```bash
+python self_play.py --episodes 1000 --run-name self_play_v11
+```
+
+Seed self-play with an existing compatible checkpoint:
+
+```bash
+python self_play.py --episodes 1000 --initial-opponent data/training_runs/agent2/checkpoints/final.pt
+```
+
 Useful training options:
 
 | Option                        |      Default | Description                                   |
@@ -148,6 +164,28 @@ Useful training options:
 | `--curriculum-stage-episodes` | split evenly | Episode counts for the five curriculum stages |
 | `--log-steps`                 |          off | Save optional `steps.csv`                     |
 | `--render`                    |          off | Open the Pygame window                        |
+
+## Self-Play
+
+V11 adds checkpoint-based self-play. The current learner periodically saves model snapshots, stores them in an opponent pool, and trains against a mix of:
+
+- Random opponents
+- Older snapshots from the current run
+- Optional checkpoint opponents passed with `--initial-opponent`
+
+This helps avoid training only against weak random behavior and starts pushing the agent toward policies that can beat earlier versions of itself.
+
+Useful self-play options:
+
+| Option                    | Default | Description                                                |
+| ------------------------- | ------: | ---------------------------------------------------------- |
+| `--checkpoint-every`      |   `100` | Save regular learner checkpoints                           |
+| `--opponent-refresh-every`|   `250` | Add the current learner to the opponent pool every N episodes |
+| `--opponent-pool-size`    |     `8` | Maximum number of older checkpoint opponents to keep       |
+| `--random-opponent-prob`  |  `0.25` | Chance of using a random opponent instead of a checkpoint  |
+| `--initial-opponent`      |    none | Seed the pool with one or more compatible checkpoint files |
+
+Self-play checkpoints require the same state size as the current environment. V10+ runs use an 18-value state vector, so older 9-value checkpoints are skipped automatically.
 
 ## Curriculum Learning
 
@@ -210,33 +248,44 @@ Useful graph options:
 
 ## Training Run Visualizations
 
-These charts compare the first DQN training run, where `agent1`was trained and `agent2` was left on `randomMode`, with the newer `agent2` run created after the V10 state representation improvements.
-Each run used 1k episodes of 1k steps, which makes up to `1 MILLION` iterations per run. The first run completed in around 2.5 mins on an `Apple arm M3` proccesor, which proves the efficiency of the algorithms.
+These charts compare the original `agent1` training run with the newer `newAgent` run.
+Both runs used 1k episodes of 1k steps, which makes up to `1 MILLION` possible environment steps per run.
 
-Note: `agent1` used the earlier 9-value state vector, while `agent2` used the newer 18-value V10 state vector. This makes the plots useful for progress tracking, but not a perfectly controlled A/B test.
+Note: this is not a perfectly controlled A/B test. `agent1` used the older V7 setup with the 9-value state vector and reward v1 against a random opponent. `newAgent` used the V12 setup with the 18-value state vector, reward v2, and checkpoint self-play seeded from `agent2`.
 
-| Metric           | agent1 run                                                                                  | agent2 V10 run                                                                              |
-| ---------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Rewards          | ![Agent 1 reward training plot](assets/plots/agent1/rewards.png)                            | ![Agent 2 reward training plot](assets/plots/agent2/rewards.png)                            |
-| Win Rate         | ![Agent 1 win rate training plot](assets/plots/agent1/winrate.png)                          | ![Agent 2 win rate training plot](assets/plots/agent2/winrate.png)                          |
-| Goals            | ![Agent 1 goals training plot](assets/plots/agent1/goals.png)                               | ![Agent 2 goals training plot](assets/plots/agent2/goals.png)                               |
-| Ball Touches     | ![Agent 1 ball touches training plot](assets/plots/agent1/touches.png)                      | ![Agent 2 ball touches training plot](assets/plots/agent2/touches.png)                      |
-| Distance to Ball | ![Agent 1 average distance to ball training plot](assets/plots/agent1/distance_to_ball.png) | ![Agent 2 average distance to ball training plot](assets/plots/agent2/distance_to_ball.png) |
-| Episode Length   | ![Agent 1 episode length training plot](assets/plots/agent1/episode_length.png)             | ![Agent 2 episode length training plot](assets/plots/agent2/episode_length.png)             |
-| Epsilon Decay    | ![Agent 1 epsilon decay training plot](assets/plots/agent1/epsilon.png)                     | ![Agent 2 epsilon decay training plot](assets/plots/agent2/epsilon.png)                     |
+### Comparison Dashboard
+
+![agent1 vs newAgent comparison dashboard](assets/plots/comparison/agent1_vs_newAgent/comparison_dashboard.png)
+
+### Individual Comparison Graphs
+
+| Metric           | Comparison graph                                                                                         |
+| ---------------- | -------------------------------------------------------------------------------------------------------- |
+| Rewards          | ![agent1 vs newAgent reward comparison](assets/plots/comparison/agent1_vs_newAgent/reward_comparison.png) |
+| Win Rate         | ![agent1 vs newAgent win rate comparison](assets/plots/comparison/agent1_vs_newAgent/winrate_comparison.png) |
+| Goals            | ![agent1 vs newAgent goals comparison](assets/plots/comparison/agent1_vs_newAgent/goals_comparison.png) |
+| Ball Touches     | ![agent1 vs newAgent touches comparison](assets/plots/comparison/agent1_vs_newAgent/touches_comparison.png) |
+| Connected Kicks  | ![agent1 vs newAgent kicks comparison](assets/plots/comparison/agent1_vs_newAgent/kicks_comparison.png) |
+| Steals           | ![agent1 vs newAgent steals comparison](assets/plots/comparison/agent1_vs_newAgent/steals_comparison.png) |
+| Distance to Ball | ![agent1 vs newAgent distance comparison](assets/plots/comparison/agent1_vs_newAgent/distance_to_ball_comparison.png) |
+| Episode Length   | ![agent1 vs newAgent episode length comparison](assets/plots/comparison/agent1_vs_newAgent/episode_length_comparison.png) |
+| Epsilon Decay    | ![agent1 vs newAgent epsilon comparison](assets/plots/comparison/agent1_vs_newAgent/epsilon_comparison.png) |
 
 ### Training Comparison
 
-The original `agent1` run learned to score more often and ended with a stronger final-100-episode reward curve. The newer V10 `agent2` run used richer state inputs, but the highlighted agent side was more conservative: it survived longer on average while still struggling to convert possessions into goals. This is mainly coused by the old reward system in V6, it is still consistant with old `ACTIONS` and not updates to suit the newly added action, the great gap will be seen in V12 when I update the reward system.
+`newAgent` gets much higher shaped reward under V12, but `agent1` still scored and won more often in the final 100 episodes. This suggests V12 changed the reward incentives substantially, but goal conversion still needs work.
 
-| Last 100 Episodes                          | agent1 run | agent2 V10 run |
-| ------------------------------------------ | ---------: | -------------: |
-| Highlighted agent average reward           |    `73.67` |       `-26.71` |
-| Highlighted agent goals / episode          |     `0.54` |         `0.02` |
-| Highlighted agent touches / episode        |     `1.65` |         `1.69` |
-| Highlighted agent average distance to ball |   `171.94` |       `210.93` |
-| Average episode length                     |    `554.3` |        `719.3` |
-| Final epsilon                              |     `0.05` |         `0.05` |
+| Last 100 Episodes                | agent1 run | newAgent run |
+| -------------------------------- | ---------: | -----------: |
+| Average reward                   |    `73.67` |     `158.11` |
+| Win rate                         |      `54%` |         `7%` |
+| Goals / episode                  |     `0.54` |       `0.07` |
+| Touches / episode                |     `1.65` |       `0.75` |
+| Connected kicks / episode        |     `0.06` |       `0.13` |
+| Steals / episode                 |     `0.01` |       `0.00` |
+| Average distance to ball         |   `171.94` |     `202.49` |
+| Average episode length           |   `554.33` |     `925.31` |
+| Final epsilon                    |     `0.05` |       `0.05` |
 
 ## Output Data
 
@@ -246,7 +295,7 @@ Every logged run creates a folder under:
 data/training_runs/<run_name>/
 ```
 
-Example V10 training output:
+Example V12 training output:
 
 ```text
 data/training_runs/run_YYYYMMDD_HHMMSS/
@@ -257,6 +306,9 @@ data/training_runs/run_YYYYMMDD_HHMMSS/
 │   ├── episode_000100.pt
 │   ├── episode_000200.pt
 │   └── final.pt
+├── opponents/             # self_play.py only
+│   ├── episode_000250.pt
+│   └── episode_000500.pt
 └── plots/
     ├── rewards.png
     ├── winrate.png
@@ -267,21 +319,44 @@ data/training_runs/run_YYYYMMDD_HHMMSS/
     └── epsilon.png
 ```
 
-`episodes.csv` includes episode length, winner, scores, goals, touches, kicks, steals, average distance to ball, total rewards, epsilon, and timestamp.
+`episodes.csv` includes episode length, winner, scores, goals, touches, kicks, steals, average distance to ball, total rewards, reward component totals, epsilon, and timestamp.
 
-## Reward Shaping V1
+## Reward Shaping V2
 
-The current reward function is intentionally simple:
+V12 keeps the original goal/touch/progress signals and adds soccer-specific reward shaping with component-level logging. This makes reward behavior easier to debug in `episodes.csv`.
 
-| Event                           |  Reward |
-| ------------------------------- | ------: |
-| Score a goal                    |  `+100` |
-| Concede a goal                  |  `-100` |
-| Touch the ball                  |    `+2` |
-| Ball moves toward opponent goal |  `+0.2` |
-| Every step                      | `-0.01` |
+| Event or behavior                     | Reward / penalty |
+| ------------------------------------- | ---------------: |
+| Score a goal                          |           `+100` |
+| Concede a goal                        |           `-100` |
+| Touch the ball                        |             `+2` |
+| Ball moves toward opponent goal       |           `+0.2` |
+| Steal possession                      |             `+8` |
+| Useful kick toward opponent goal      |             `+1` |
+| Move into a better attacking position |           `+0.5` |
+| Own goal                              |             `-1` |
+| Unnecessary kick                      |          `-0.05` |
+| Energy usage                          | `-0.001 * speed` |
+| Push ball toward own goal             |           `-0.2` |
+| Every step                            |          `-0.01` |
 
 Team 1 attacks the right goal. Team 2 attacks the left goal.
+
+Reward components are logged separately for both agents:
+
+```text
+goal_reward
+touch_reward
+progress_reward
+steal_reward
+useful_kick_reward
+attacking_position_reward
+own_goal_penalty
+unnecessary_kick_penalty
+energy_penalty
+own_goal_push_penalty
+time_penalty
+```
 
 ## Environment API
 
@@ -349,6 +424,7 @@ V10 expands the environment state from the original compact state to an 18-value
 ```text
 RLStriker/
 ├── agents/
+│   ├── checkpoint_opponent.py
 │   ├── dqn_agent.py
 │   ├── model.py
 │   ├── random_agent.py
@@ -378,6 +454,7 @@ RLStriker/
 │   └── training_runs/
 ├── main.py
 ├── run_random.py
+├── self_play.py
 ├── train.py
 ├── requirements.txt
 └── README.md
@@ -385,8 +462,6 @@ RLStriker/
 
 ## Development Roadmap
 
-- V11: Self-play against older checkpoints
-- V12: More detailed soccer rewards and reward components
 - V13: Demo mode for trained models
 - V14: Human vs AI mode
 - V15: Multi-agent 2v2 expansion

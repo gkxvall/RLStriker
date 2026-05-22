@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 from env import constants as C
+from env.rewards import COMPONENT_KEYS
 
 if TYPE_CHECKING:
     from env.soccer_env import SoccerEnv
@@ -39,11 +40,13 @@ class EpisodeMetricsRow:
     steals_agent_2: int
     avg_distance_to_ball_agent_1: float
     avg_distance_to_ball_agent_2: float
+    reward_components_agent_1: dict[str, float]
+    reward_components_agent_2: dict[str, float]
     epsilon: float
     timestamp: str
 
     def as_csv_dict(self) -> dict[str, Any]:
-        return {
+        row = {
             "run_name": self.run_name,
             "episode": self.episode,
             "total_steps": self.total_steps,
@@ -65,6 +68,10 @@ class EpisodeMetricsRow:
             "epsilon": self.epsilon,
             "timestamp": self.timestamp,
         }
+        for key in COMPONENT_KEYS:
+            row[f"{key}_agent_1"] = round(self.reward_components_agent_1.get(key, 0.0), 4)
+            row[f"{key}_agent_2"] = round(self.reward_components_agent_2.get(key, 0.0), 4)
+        return row
 
 
 class EpisodeMetricsTracker:
@@ -83,6 +90,8 @@ class EpisodeMetricsTracker:
         self._sum_dist_1 = 0.0
         self._sum_dist_2 = 0.0
         self._last_touch_owner: int | None = None
+        self.reward_components_agent_1 = {key: 0.0 for key in COMPONENT_KEYS}
+        self.reward_components_agent_2 = {key: 0.0 for key in COMPONENT_KEYS}
 
     def on_step(self, env: SoccerEnv, info: dict[str, Any]) -> None:
         p1, p2, ball = env.player_1, env.player_2, env.ball
@@ -111,8 +120,16 @@ class EpisodeMetricsTracker:
         if info.get("kick_connected_2"):
             self.kicks_agent_2 += 1
 
+        components = info.get("reward_components", {})
+        self._add_reward_components(self.reward_components_agent_1, components.get("agent_1", {}))
+        self._add_reward_components(self.reward_components_agent_2, components.get("agent_2", {}))
+
         self._sum_dist_1 += p1.distance_to(ball.x, ball.y)
         self._sum_dist_2 += p2.distance_to(ball.x, ball.y)
+
+    def _add_reward_components(self, target: dict[str, float], components: dict[str, Any]) -> None:
+        for key in COMPONENT_KEYS:
+            target[key] += float(components.get(key, 0.0))
 
     def finalize(
         self,
@@ -152,6 +169,8 @@ class EpisodeMetricsTracker:
             steals_agent_2=self.steals_agent_2,
             avg_distance_to_ball_agent_1=avg1,
             avg_distance_to_ball_agent_2=avg2,
+            reward_components_agent_1=dict(self.reward_components_agent_1),
+            reward_components_agent_2=dict(self.reward_components_agent_2),
             epsilon=epsilon,
             timestamp=timestamp,
         )
