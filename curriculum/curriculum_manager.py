@@ -170,6 +170,7 @@ class CurriculumManager:
         env.match.done = False
         env.match.last_scorer = None
         env.match.end_reason = ""
+        env.last_touch_owner = None
         env.ball.reset(C.FIELD_CENTER_X, C.FIELD_CENTER_Y)
         info["goal"] = False
         info["scorer"] = None

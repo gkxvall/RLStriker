@@ -33,6 +33,7 @@ class SoccerEnv:
 
         self.player_1, self.player_2, self.ball = self.field.reset_entities()
         self.players = [self.player_1, self.player_2]
+        self.last_touch_owner: int | None = None
 
         self.screen: pygame.Surface | None = None
         self.clock: pygame.time.Clock | None = None
@@ -46,6 +47,7 @@ class SoccerEnv:
         self.match.new_episode()
         self.player_1, self.player_2, self.ball = self.field.reset_entities()
         self.players = [self.player_1, self.player_2]
+        self.last_touch_owner = None
         return self._get_state()
 
     def step(self, action_1: int, action_2: int) -> tuple[list[float], float, float, bool, dict[str, Any]]:
@@ -65,9 +67,11 @@ class SoccerEnv:
             kick_connected_2 = kick_ball(self.player_2, self.ball)
 
         update_physics(self.players, self.ball, [move_1, move_2])
+        self._update_last_touch_owner(kick_connected_1, kick_connected_2)
         info = self.match.step_after_physics(self.ball)
         info["kick_connected_1"] = kick_connected_1
         info["kick_connected_2"] = kick_connected_2
+        info["last_touch_owner"] = self.last_touch_owner
 
         reward_1, reward_2 = compute_step_rewards(
             self.player_1,
@@ -122,8 +126,29 @@ class SoccerEnv:
         return (0.0, 0.0)
 
     def _get_state(self) -> list[float]:
-        state = build_state(self.player_1, self.player_2, self.ball, self.match.steps)
+        state = build_state(
+            self.player_1,
+            self.player_2,
+            self.ball,
+            self.match.steps,
+            self.last_touch_owner,
+        )
         return state.to_list()
+
+    def _update_last_touch_owner(self, kick_connected_1: bool, kick_connected_2: bool) -> None:
+        if kick_connected_1 and not kick_connected_2:
+            self.last_touch_owner = 1
+            return
+        if kick_connected_2 and not kick_connected_1:
+            self.last_touch_owner = 2
+            return
+
+        touching_1 = self.player_1.distance_to(self.ball.x, self.ball.y) <= C.PLAYER_RADIUS + C.BALL_RADIUS + 0.5
+        touching_2 = self.player_2.distance_to(self.ball.x, self.ball.y) <= C.PLAYER_RADIUS + C.BALL_RADIUS + 0.5
+        if touching_1 and not touching_2:
+            self.last_touch_owner = 1
+        elif touching_2 and not touching_1:
+            self.last_touch_owner = 2
 
     def _init_pygame(self) -> None:
         if not pygame.get_init():

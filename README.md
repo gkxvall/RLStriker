@@ -2,7 +2,7 @@
 
 RLStriker is a 2D 1v1 soccer reinforcement learning environment built with Python, Pygame, PyTorch, pandas, and matplotlib.
 
-The project is being built version by version. The current version is **V9**, which adds curriculum learning on top of the existing environment, rewards, logging, random agents, DQN training pipeline, and graph generation tools.
+The project is being built version by version. The current version is **V10**, which adds a richer state representation on top of the existing environment, rewards, logging, random agents, DQN training pipeline, graph generation tools, and curriculum learning.
 
 ![RLStriker Pygame preview](assets/preview.png)
 
@@ -25,22 +25,24 @@ The project is being built version by version. The current version is **V9**, wh
   - Checkpoint saving
 - Training analysis scripts that generate PNG graphs from `episodes.csv`
 - Curriculum learning stages for easier DQN skill progression
+- V10 state vector with distance, angle, goal-distance, ball-direction, and last-touch features
 
 ## Project Status
 
-| Version | Status | Summary |
-| --- | --- | --- |
-| V1 | Done | Basic Pygame soccer field |
-| V2 | Done | Physics, kicking, goals, score, episode timer |
-| V3 | Done | Gym-style environment |
-| V4 | Done | Random agents |
-| V5 | Done | Episode logging |
-| V6 | Done | Simple reward shaping |
-| V7 | Done | Basic DQN training pipeline |
-| V8 | Done | Training dashboard graphs |
-| V9 | Done | Curriculum learning |
+| Version | Status | Summary                                       |
+| ------- | ------ | --------------------------------------------- |
+| V1      | Done   | Basic Pygame soccer field                     |
+| V2      | Done   | Physics, kicking, goals, score, episode timer |
+| V3      | Done   | Gym-style environment                         |
+| V4      | Done   | Random agents                                 |
+| V5      | Done   | Episode logging                               |
+| V6      | Done   | Simple reward shaping                         |
+| V7      | Done   | Basic DQN training pipeline                   |
+| V8      | Done   | Training dashboard graphs                     |
+| V9      | Done   | Curriculum learning                           |
+| V10     | Done   | Better state representation                   |
 
-Next planned version: **V10 - Better state representation**.
+Next planned version: **V11 - Self-play against older checkpoints**.
 
 ## Installation
 
@@ -67,10 +69,10 @@ python main.py
 
 Controls:
 
-| Player | Move | Kick |
-| --- | --- | --- |
+| Player         | Move                 | Kick    |
+| -------------- | -------------------- | ------- |
 | Blue / agent 1 | `WASD` or arrow keys | `Space` |
-| Red / agent 2 | `I J K L` | `Enter` |
+| Red / agent 2  | `I J K L`            | `Enter` |
 
 Reset the episode with `R` or the reset button.
 
@@ -116,7 +118,7 @@ Use a custom run name:
 python train.py --episodes 1000 --run-name dqn_agent1_v7
 ```
 
-Train with the V9 curriculum:
+Train with curriculum learning:
 
 ```bash
 python train.py --episodes 1000 --curriculum --run-name curriculum_agent1_v9
@@ -130,34 +132,34 @@ python train.py --episodes 1000 --curriculum --curriculum-stage-episodes 100,150
 
 Useful training options:
 
-| Option | Default | Description |
-| --- | ---: | --- |
-| `--episodes` | `500` | Number of episodes |
-| `--train-agent` | `1` | Which side learns, `1` or `2` |
-| `--checkpoint-every` | `100` | Save a model every N episodes |
-| `--learning-rate` | `0.001` | Adam learning rate |
-| `--gamma` | `0.99` | Discount factor |
-| `--epsilon-start` | `1.0` | Initial exploration rate |
-| `--epsilon-min` | `0.05` | Minimum exploration rate |
-| `--epsilon-decay` | `0.995` | Episode-level epsilon decay |
-| `--batch-size` | `64` | Replay batch size |
-| `--buffer-size` | `50000` | Replay memory capacity |
-| `--curriculum` | off | Enable V9 curriculum learning |
+| Option                        |      Default | Description                                   |
+| ----------------------------- | -----------: | --------------------------------------------- |
+| `--episodes`                  |        `500` | Number of episodes                            |
+| `--train-agent`               |          `1` | Which side learns, `1` or `2`                 |
+| `--checkpoint-every`          |        `100` | Save a model every N episodes                 |
+| `--learning-rate`             |      `0.001` | Adam learning rate                            |
+| `--gamma`                     |       `0.99` | Discount factor                               |
+| `--epsilon-start`             |        `1.0` | Initial exploration rate                      |
+| `--epsilon-min`               |       `0.05` | Minimum exploration rate                      |
+| `--epsilon-decay`             |      `0.995` | Episode-level epsilon decay                   |
+| `--batch-size`                |         `64` | Replay batch size                             |
+| `--buffer-size`               |      `50000` | Replay memory capacity                        |
+| `--curriculum`                |          off | Enable curriculum learning                    |
 | `--curriculum-stage-episodes` | split evenly | Episode counts for the five curriculum stages |
-| `--log-steps` | off | Save optional `steps.csv` |
-| `--render` | off | Open the Pygame window |
+| `--log-steps`                 |          off | Save optional `steps.csv`                     |
+| `--render`                    |          off | Open the Pygame window                        |
 
 ## Curriculum Learning
 
-V9 adds an optional staged training path. The goal is to teach the agent small soccer skills before asking it to survive a full match.
+Curriculum learning adds an optional staged training path. The goal is to teach the agent small soccer skills before asking it to survive a full match.
 
-| Stage | Name | Opponent | Training focus |
-| ---: | --- | --- | --- |
-| 1 | Reach the Ball | None | Move toward the ball and touch it |
-| 2 | Push Toward Goal | None | Touch the ball and move it toward the opponent goal |
-| 3 | Score Goals | None | Use normal goal rewards with scoring enabled |
-| 4 | Weak Random Opponent | Weak random | Add light pressure from an opponent |
-| 5 | Self-Play Mirror | Current model | Play against the learner's current policy |
+| Stage | Name                 | Opponent      | Training focus                                      |
+| ----: | -------------------- | ------------- | --------------------------------------------------- |
+|     1 | Reach the Ball       | None          | Move toward the ball and touch it                   |
+|     2 | Push Toward Goal     | None          | Touch the ball and move it toward the opponent goal |
+|     3 | Score Goals          | None          | Use normal goal rewards with scoring enabled        |
+|     4 | Weak Random Opponent | Weak random   | Add light pressure from an opponent                 |
+|     5 | Self-Play Mirror     | Current model | Play against the learner's current policy           |
 
 Curriculum runs still write the same `episodes.csv`, checkpoints, and optional `steps.csv` files. The run `config.json` includes the full curriculum schedule.
 
@@ -199,44 +201,42 @@ python -m analysis.plot_touches --run-dir data/training_runs/dqn_agent1_v7
 
 Useful graph options:
 
-| Option | Default | Description |
-| --- | ---: | --- |
-| `--run-dir` | required | Folder containing `episodes.csv` |
-| `--output-dir` | `<run-dir>/plots` | Where PNG files are saved |
-| `--window` | `100` | Rolling average window |
-| `--show` | off | Open an interactive matplotlib window |
+| Option         |           Default | Description                           |
+| -------------- | ----------------: | ------------------------------------- |
+| `--run-dir`    |          required | Folder containing `episodes.csv`      |
+| `--output-dir` | `<run-dir>/plots` | Where PNG files are saved             |
+| `--window`     |             `100` | Rolling average window                |
+| `--show`       |               off | Open an interactive matplotlib window |
 
-## First Training Run Visualization
+## Training Run Visualizations
 
-These charts come from the first DQN training run saved as `agent1`. They are included in `assets/plots/agent1/` so they render directly on GitHub.
+These charts compare the first DQN training run, where `agent1`was trained and `agent2` was left on `randomMode`, with the newer `agent2` run created after the V10 state representation improvements.
+Each run used 1k episodes of 1k steps, which makes up to `1 MILLION` iterations per run. The first run completed in around 2.5 mins on an `Apple arm M3` proccesor, which proves the efficiency of the algorithms.
 
-### Rewards
+Note: `agent1` used the earlier 9-value state vector, while `agent2` used the newer 18-value V10 state vector. This makes the plots useful for progress tracking, but not a perfectly controlled A/B test.
 
-![Agent 1 reward training plot](assets/plots/agent1/rewards.png)
+| Metric           | agent1 run                                                                                  | agent2 V10 run                                                                              |
+| ---------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Rewards          | ![Agent 1 reward training plot](assets/plots/agent1/rewards.png)                            | ![Agent 2 reward training plot](assets/plots/agent2/rewards.png)                            |
+| Win Rate         | ![Agent 1 win rate training plot](assets/plots/agent1/winrate.png)                          | ![Agent 2 win rate training plot](assets/plots/agent2/winrate.png)                          |
+| Goals            | ![Agent 1 goals training plot](assets/plots/agent1/goals.png)                               | ![Agent 2 goals training plot](assets/plots/agent2/goals.png)                               |
+| Ball Touches     | ![Agent 1 ball touches training plot](assets/plots/agent1/touches.png)                      | ![Agent 2 ball touches training plot](assets/plots/agent2/touches.png)                      |
+| Distance to Ball | ![Agent 1 average distance to ball training plot](assets/plots/agent1/distance_to_ball.png) | ![Agent 2 average distance to ball training plot](assets/plots/agent2/distance_to_ball.png) |
+| Episode Length   | ![Agent 1 episode length training plot](assets/plots/agent1/episode_length.png)             | ![Agent 2 episode length training plot](assets/plots/agent2/episode_length.png)             |
+| Epsilon Decay    | ![Agent 1 epsilon decay training plot](assets/plots/agent1/epsilon.png)                     | ![Agent 2 epsilon decay training plot](assets/plots/agent2/epsilon.png)                     |
 
-### Win Rate
+### Training Comparison
 
-![Agent 1 win rate training plot](assets/plots/agent1/winrate.png)
+The original `agent1` run learned to score more often and ended with a stronger final-100-episode reward curve. The newer V10 `agent2` run used richer state inputs, but the highlighted agent side was more conservative: it survived longer on average while still struggling to convert possessions into goals. This is mainly coused by the old reward system in V6, it is still consistant with old `ACTIONS` and not updates to suit the newly added action, the great gap will be seen in V12 when I update the reward system.
 
-### Goals
-
-![Agent 1 goals training plot](assets/plots/agent1/goals.png)
-
-### Ball Touches
-
-![Agent 1 ball touches training plot](assets/plots/agent1/touches.png)
-
-### Distance to Ball
-
-![Agent 1 average distance to ball training plot](assets/plots/agent1/distance_to_ball.png)
-
-### Episode Length
-
-![Agent 1 episode length training plot](assets/plots/agent1/episode_length.png)
-
-### Epsilon Decay
-
-![Agent 1 epsilon decay training plot](assets/plots/agent1/epsilon.png)
+| Last 100 Episodes                          | agent1 run | agent2 V10 run |
+| ------------------------------------------ | ---------: | -------------: |
+| Highlighted agent average reward           |    `73.67` |       `-26.71` |
+| Highlighted agent goals / episode          |     `0.54` |         `0.02` |
+| Highlighted agent touches / episode        |     `1.65` |         `1.69` |
+| Highlighted agent average distance to ball |   `171.94` |       `210.93` |
+| Average episode length                     |    `554.3` |        `719.3` |
+| Final epsilon                              |     `0.05` |         `0.05` |
 
 ## Output Data
 
@@ -246,7 +246,7 @@ Every logged run creates a folder under:
 data/training_runs/<run_name>/
 ```
 
-Example V9 training output:
+Example V10 training output:
 
 ```text
 data/training_runs/run_YYYYMMDD_HHMMSS/
@@ -273,13 +273,13 @@ data/training_runs/run_YYYYMMDD_HHMMSS/
 
 The current reward function is intentionally simple:
 
-| Event | Reward |
-| --- | ---: |
-| Score a goal | `+100` |
-| Concede a goal | `-100` |
-| Touch the ball | `+2` |
-| Ball moves toward opponent goal | `+0.2` |
-| Every step | `-0.01` |
+| Event                           |  Reward |
+| ------------------------------- | ------: |
+| Score a goal                    |  `+100` |
+| Concede a goal                  |  `-100` |
+| Touch the ball                  |    `+2` |
+| Ball moves toward opponent goal |  `+0.2` |
+| Every step                      | `-0.01` |
 
 Team 1 attacks the right goal. Team 2 attacks the left goal.
 
@@ -306,14 +306,43 @@ env.close()
 
 Actions:
 
-| ID | Action |
-| ---: | --- |
-| `0` | Stay |
-| `1` | Up |
-| `2` | Down |
-| `3` | Left |
-| `4` | Right |
-| `5` | Kick |
+|  ID | Action |
+| --: | ------ |
+| `0` | Stay   |
+| `1` | Up     |
+| `2` | Down   |
+| `3` | Left   |
+| `4` | Right  |
+| `5` | Kick   |
+
+## State Representation
+
+V10 expands the environment state from the original compact state to an 18-value vector:
+
+```text
+[
+  agent_1_x,
+  agent_1_y,
+  agent_2_x,
+  agent_2_y,
+  ball_x,
+  ball_y,
+  ball_vx,
+  ball_vy,
+  agent_1_distance_to_ball,
+  agent_1_angle_to_ball,
+  agent_2_distance_to_ball,
+  agent_2_angle_to_ball,
+  ball_distance_to_agent_1_goal,
+  ball_distance_to_agent_2_goal,
+  ball_moving_toward_agent_1_goal,
+  ball_moving_toward_agent_2_goal,
+  last_touch_owner,
+  steps,
+]
+```
+
+`last_touch_owner` is encoded as `0`, `1`, or `2`. Because the DQN input size changed in V10, checkpoints from older state sizes should be retrained before use with the current model.
 
 ## Repository Structure
 
@@ -356,7 +385,6 @@ RLStriker/
 
 ## Development Roadmap
 
-- V10: Better state representation
 - V11: Self-play against older checkpoints
 - V12: More detailed soccer rewards and reward components
 - V13: Demo mode for trained models

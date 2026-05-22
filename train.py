@@ -245,7 +245,7 @@ def main() -> None:
     parser.add_argument(
         "--curriculum",
         action="store_true",
-        help="Enable V9 curriculum learning stages.",
+        help="Enable curriculum learning stages.",
     )
     parser.add_argument(
         "--curriculum-stage-episodes",
@@ -316,7 +316,7 @@ def main() -> None:
     if curriculum is None:
         print(f"Training DQN agent {args.train_agent} against a random opponent for {args.episodes} episodes.")
     else:
-        print(f"Training DQN agent {args.train_agent} with V9 curriculum for {args.episodes} episodes.")
+        print(f"Training DQN agent {args.train_agent} with curriculum for {args.episodes} episodes.")
 
     try:
         for episode in range(1, args.episodes + 1):
