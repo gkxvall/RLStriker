@@ -2,7 +2,7 @@
 
 RLStriker is a 2D 1v1 soccer reinforcement learning environment built with Python, Pygame, PyTorch, pandas, and matplotlib.
 
-The project is being built version by version. The current version is **V12**, which adds soccer-specific reward shaping and reward component logging on top of the existing environment, DQN training pipeline, graph generation tools, curriculum learning, richer V10 state representation, and V11 checkpoint self-play.
+The project is being built version by version. The current version is **V13**, which adds demo mode for watching trained checkpoints play with a live debug overlay, on top of the existing environment, DQN training pipeline, graph generation tools, curriculum learning, richer V10 state representation, V11 checkpoint self-play, and V12 reward components.
 
 ![RLStriker Pygame preview](assets/preview.png)
 
@@ -28,6 +28,7 @@ The project is being built version by version. The current version is **V12**, w
 - V10 state vector with distance, angle, goal-distance, ball-direction, and last-touch features
 - V11 self-play against older checkpoint opponents and random baselines
 - V12 reward components for goals, touches, progress, steals, useful kicks, positioning, energy, own-goal pushes, and unnecessary kicks
+- V13 demo mode with score, episode, reward, event, model, epsilon, and FPS overlay
 
 ## Project Status
 
@@ -45,8 +46,9 @@ The project is being built version by version. The current version is **V12**, w
 | V10     | Done   | Better state representation                   |
 | V11     | Done   | Checkpoint self-play                          |
 | V12     | Done   | Better rewards and reward components          |
+| V13     | Done   | Demo mode for trained models                  |
 
-Next planned version: **V13 - Demo mode**.
+Next planned version: **V14 - Human vs AI mode**.
 
 ## Installation
 
@@ -164,6 +166,42 @@ Useful training options:
 | `--curriculum-stage-episodes` | split evenly | Episode counts for the five curriculum stages |
 | `--log-steps`                 |          off | Save optional `steps.csv`                     |
 | `--render`                    |          off | Open the Pygame window                        |
+
+## Demo Mode
+
+Watch a trained checkpoint play in the Pygame window:
+
+```bash
+python demo.py --checkpoint data/training_runs/newAgent/checkpoints/final.pt
+```
+
+By default, the trained model controls agent 1 against a random opponent. You can put the model on the red side:
+
+```bash
+python demo.py --checkpoint data/training_runs/newAgent/checkpoints/final.pt --model-agent 2
+```
+
+Watch a checkpoint-vs-checkpoint match:
+
+```bash
+python demo.py \
+  --checkpoint data/training_runs/newAgent/checkpoints/final.pt \
+  --opponent checkpoint \
+  --opponent-checkpoint data/training_runs/agent2/checkpoints/final.pt
+```
+
+The demo overlay shows score, episode, step, cumulative rewards, last event, model name, saved epsilon, and FPS. Press `R` to reset the current episode or `Esc` to quit.
+
+Useful demo options:
+
+| Option                  | Default | Description                                  |
+| ----------------------- | ------: | -------------------------------------------- |
+| `--checkpoint`          | newAgent final | Model checkpoint to watch              |
+| `--model-agent`         |     `1` | Side controlled by the model                 |
+| `--opponent`            | random  | Use `random` or `checkpoint` opponent        |
+| `--opponent-checkpoint` |    none | Checkpoint path for checkpoint opponent      |
+| `--episodes`            |   `100` | Number of demo episodes before exiting       |
+| `--fps`                 |    `60` | Playback speed                               |
 
 ## Self-Play
 
@@ -450,8 +488,11 @@ RLStriker/
 ├── curriculum/
 │   ├── curriculum_manager.py
 │   └── stages.py
+├── visual/
+│   └── debug_overlay.py
 ├── data/
 │   └── training_runs/
+├── demo.py
 ├── main.py
 ├── run_random.py
 ├── self_play.py
@@ -462,7 +503,6 @@ RLStriker/
 
 ## Development Roadmap
 
-- V13: Demo mode for trained models
 - V14: Human vs AI mode
 - V15: Multi-agent 2v2 expansion
 - V16: Final portfolio polish

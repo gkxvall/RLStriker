@@ -1,4 +1,4 @@
-"""Checkpoint-backed opponent policies for V11 self-play."""
+"""Checkpoint-backed policies for self-play and demo mode."""
 
 from __future__ import annotations
 
@@ -21,6 +21,7 @@ class CheckpointOpponent:
         self.state_size = int(checkpoint["state_size"])
         self.action_size = int(checkpoint["action_size"])
         self.hidden_size = _infer_hidden_size(checkpoint["policy_state_dict"])
+        self.epsilon = float(checkpoint.get("epsilon", 0.0))
         self.metadata: dict[str, Any] = dict(checkpoint.get("metadata", {}))
 
         self.policy_net = QNetwork(self.state_size, self.action_size, self.hidden_size).to(self.device)
