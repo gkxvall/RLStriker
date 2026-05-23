@@ -2,7 +2,7 @@
 
 RLStriker is a 2D 1v1 soccer reinforcement learning environment built with Python, Pygame, PyTorch, pandas, and matplotlib.
 
-The project is being built version by version. The current version is **V13**, which adds demo mode for watching trained checkpoints play with a live debug overlay, on top of the existing environment, DQN training pipeline, graph generation tools, curriculum learning, richer V10 state representation, V11 checkpoint self-play, and V12 reward components.
+The project is being built version by version. The current version is **V14**, which adds a human-vs-AI mode with difficulty selection on top of demo mode, DQN training, graph generation tools, curriculum learning, richer V10 state representation, V11 checkpoint self-play, and V12 reward components.
 
 ![RLStriker Pygame preview](assets/preview.png)
 
@@ -29,6 +29,7 @@ The project is being built version by version. The current version is **V13**, w
 - V11 self-play against older checkpoint opponents and random baselines
 - V12 reward components for goals, touches, progress, steals, useful kicks, positioning, energy, own-goal pushes, and unnecessary kicks
 - V13 demo mode with score, episode, reward, event, model, epsilon, and FPS overlay
+- V14 human-vs-AI mode with random, weak, strong, and latest AI difficulties
 
 ## Project Status
 
@@ -47,8 +48,9 @@ The project is being built version by version. The current version is **V13**, w
 | V11     | Done   | Checkpoint self-play                          |
 | V12     | Done   | Better rewards and reward components          |
 | V13     | Done   | Demo mode for trained models                  |
+| V14     | Done   | Human vs AI mode                              |
 
-Next planned version: **V14 - Human vs AI mode**.
+Next planned version: **V15 - Multi-agent 2v2 expansion**.
 
 ## Installation
 
@@ -81,6 +83,43 @@ Controls:
 | Red / agent 2  | `I J K L`            | `Enter` |
 
 Reset the episode with `R` or the reset button.
+
+## Human vs AI
+
+Play as one player against an AI opponent:
+
+```bash
+python manual.py
+```
+
+The game opens a difficulty menu with:
+
+| Difficulty | Behavior |
+| ---------- | -------- |
+| Random AI | Baseline random-action opponent |
+| Weak trained model | Uses the `agent2` checkpoint when available |
+| Strong trained model | Uses the `alpha` curriculum checkpoint when available |
+| Latest model | Uses the newest compatible non-smoke checkpoint |
+
+Skip the menu and start directly:
+
+```bash
+python manual.py --difficulty strong
+```
+
+Play as red / agent 2:
+
+```bash
+python manual.py --human-agent 2 --difficulty latest
+```
+
+Override the checkpoint used by trained difficulties:
+
+```bash
+python manual.py --difficulty strong --checkpoint data/training_runs/alpha/checkpoints/final.pt
+```
+
+Controls: move with `WASD` or arrow keys, kick with `Space`, restart with `R`, reopen the difficulty menu with `M`, and quit with `Esc`.
 
 ## Random Self-Play
 
@@ -494,11 +533,13 @@ RLStriker/
 │   ├── curriculum_manager.py
 │   └── stages.py
 ├── visual/
-│   └── debug_overlay.py
+│   ├── debug_overlay.py
+│   └── menu.py
 ├── data/
 │   └── training_runs/
 ├── demo.py
 ├── main.py
+├── manual.py
 ├── run_random.py
 ├── self_play.py
 ├── train.py
@@ -508,7 +549,6 @@ RLStriker/
 
 ## Development Roadmap
 
-- V14: Human vs AI mode
 - V15: Multi-agent 2v2 expansion
 - V16: Final portfolio polish
 
