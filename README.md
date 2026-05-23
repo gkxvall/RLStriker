@@ -239,6 +239,39 @@ Curriculum learning adds an optional staged training path. The goal is to teach 
 
 Curriculum runs still write the same `episodes.csv`, checkpoints, and optional `steps.csv` files. The run `config.json` includes the full curriculum schedule.
 
+## Alpha Curriculum Learning Plots
+
+The `alpha` run is a full curriculum training run using the V12 reward system and the V10 18-value state representation. It trained agent 1 for 5,000 episodes: 1,000 episodes in each curriculum stage.
+
+### Alpha Curriculum Dashboard
+
+![Alpha curriculum dashboard](assets/plots/alpha/curriculum_dashboard.png)
+
+### Alpha Individual Plots
+
+| Metric           | Plot                                                                      |
+| ---------------- | ------------------------------------------------------------------------- |
+| Rewards          | ![Alpha reward plot](assets/plots/alpha/rewards.png)                      |
+| Win Rate         | ![Alpha win rate plot](assets/plots/alpha/winrate.png)                    |
+| Goals            | ![Alpha goals plot](assets/plots/alpha/goals.png)                         |
+| Ball Touches     | ![Alpha touches plot](assets/plots/alpha/touches.png)                     |
+| Distance to Ball | ![Alpha distance to ball plot](assets/plots/alpha/distance_to_ball.png)   |
+| Episode Length   | ![Alpha episode length plot](assets/plots/alpha/episode_length.png)       |
+| Epsilon Decay    | ![Alpha epsilon decay plot](assets/plots/alpha/epsilon.png)               |
+
+### Alpha Final Performance
+
+In the final 100 episodes, alpha reached a much cleaner scoring rhythm:
+
+| Last 100 Episodes        | Alpha |
+| ------------------------ | ----: |
+| Agent 1 average reward   | `155.10` |
+| Agent 1 goals / episode  | `0.99` |
+| Agent 2 goals / episode  | `0.00` |
+| Agent 1 touches / episode| `1.68` |
+| Average episode length   | `138.5` |
+| Final epsilon            | `0.05` |
+
 ## Training Graphs
 
 Generate all V8 graphs for a saved run:
