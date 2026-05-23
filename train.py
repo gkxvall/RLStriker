@@ -285,7 +285,7 @@ def main() -> None:
         log_steps=args.log_steps,
         config={
             "script": "train.py",
-            "version": "V12",
+            "version": "V16",
             "agent": "dqn",
             "opponent": "curriculum" if args.curriculum else "random",
             "train_agent": args.train_agent,

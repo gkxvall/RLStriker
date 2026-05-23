@@ -341,7 +341,7 @@ def main() -> None:
         log_steps=args.log_steps,
         config={
             "script": "self_play.py",
-            "version": "V12",
+            "version": "V16",
             "agent": "dqn",
             "opponent": "checkpoint_self_play",
             "train_agent": args.train_agent,

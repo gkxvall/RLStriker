@@ -1,8 +1,8 @@
 # RLStriker
 
-RLStriker is a 2D 1v1 soccer reinforcement learning environment built with Python, Pygame, PyTorch, pandas, and matplotlib.
+RLStriker is a 2D soccer reinforcement learning project built with Python, Pygame, PyTorch, pandas, and matplotlib.
 
-The project is being built version by version. The current version is **V14**, which adds a human-vs-AI mode with difficulty selection on top of demo mode, DQN training, graph generation tools, curriculum learning, richer V10 state representation, V11 checkpoint self-play, and V12 reward components.
+The project is complete through **V16**, the final portfolio polish pass. It includes a playable Pygame soccer environment, Gym-style headless simulation, DQN training, checkpoint self-play, curriculum learning, reward-component logging, graph generation, demo mode, human-vs-AI mode, and a first 2v2 team environment.
 
 ![RLStriker Pygame preview](assets/preview.png)
 
@@ -30,6 +30,8 @@ The project is being built version by version. The current version is **V14**, w
 - V12 reward components for goals, touches, progress, steals, useful kicks, positioning, energy, own-goal pushes, and unnecessary kicks
 - V13 demo mode with score, episode, reward, event, model, epsilon, and FPS overlay
 - V14 human-vs-AI mode with random, weak, strong, and latest AI difficulties
+- V15 2v2 team soccer environment with role baselines, passing reward, spacing reward, and team rewards
+- V16 portfolio-ready README, architecture notes, run instructions, demo guidance, and project explanation
 
 ## Project Status
 
@@ -49,8 +51,10 @@ The project is being built version by version. The current version is **V14**, w
 | V12     | Done   | Better rewards and reward components          |
 | V13     | Done   | Demo mode for trained models                  |
 | V14     | Done   | Human vs AI mode                              |
+| V15     | Done   | Multi-agent 2v2 expansion                     |
+| V16     | Done   | Final portfolio polish                        |
 
-Next planned version: **V15 - Multi-agent 2v2 expansion**.
+RLStriker is now in a portfolio-ready state. Future work can focus on stronger 2v2 learning, richer evaluation, and longer training runs.
 
 ## Installation
 
@@ -68,6 +72,20 @@ On Windows:
 .venv\Scripts\activate
 pip install -r requirements.txt
 ```
+
+## Quick Start
+
+| Goal | Command |
+| ---- | ------- |
+| Play the 1v1 sandbox | `python main.py` |
+| Run random 1v1 agents | `python run_random.py --episodes 100` |
+| Train a DQN learner | `python train.py --episodes 500` |
+| Train with curriculum | `python train.py --episodes 1000 --curriculum` |
+| Train with checkpoint self-play | `python self_play.py --episodes 1000` |
+| Watch a trained checkpoint | `python demo.py --checkpoint data/training_runs/newAgent/checkpoints/final.pt` |
+| Play against an AI | `python manual.py` |
+| Run 2v2 baseline agents | `python run_team_random.py --episodes 10` |
+| Generate training graphs | `python -m analysis.plot_all --run-dir data/training_runs/<run_name>` |
 
 ## Manual Play
 
@@ -136,6 +154,38 @@ python run_random.py --episodes 50 --run-name random_v6_baseline
 python run_random.py --episodes 10 --render
 python run_random.py --episodes 10 --log-steps
 ```
+
+## 2v2 Team Mode
+
+Run the 2v2 team environment with baseline team agents:
+
+```bash
+python run_team_random.py --episodes 10
+```
+
+Render the 2v2 match:
+
+```bash
+python run_team_random.py --episodes 3 --render
+```
+
+Try the simple role baseline against random team actions:
+
+```bash
+python run_team_random.py --team-1 role --team-2 random
+```
+
+V15 introduces `TeamSoccerEnv`, where each team has two players. Rewards are team-level and include:
+
+| Signal | Purpose |
+| ------ | ------- |
+| Team goal / concede | Shared team scoring reward |
+| Ball progress | Reward moving the ball toward the opponent goal |
+| Touch reward | Small reward when a team controls the ball |
+| Passing reward | Reward when teammates exchange possession while the ball is moving |
+| Spacing reward | Reward teammates for not collapsing onto the same position |
+
+This is the first 2v2 foundation. It does not replace the 1v1 DQN/self-play stack; it gives the next versions a clean team environment to build on.
 
 ## DQN Training
 
@@ -241,6 +291,19 @@ Useful demo options:
 | `--opponent-checkpoint` |           none | Checkpoint path for checkpoint opponent |
 | `--episodes`            |          `100` | Number of demo episodes before exiting  |
 | `--fps`                 |           `60` | Playback speed                          |
+
+## Demo Video Guide
+
+For a short portfolio video, record one or more of these flows:
+
+```bash
+python main.py
+python demo.py --checkpoint data/training_runs/newAgent/checkpoints/final.pt
+python manual.py --difficulty strong
+python run_team_random.py --episodes 3 --render
+```
+
+A clear demo sequence is: show the manual sandbox, show a trained checkpoint in demo mode, show the generated training graphs, then show the 2v2 baseline mode. The Pygame title bar and overlays identify the project, score, rewards, episode, model, and FPS during visual playback.
 
 ## Self-Play
 
@@ -369,6 +432,27 @@ Note: this is not a perfectly controlled A/B test. `agent1` used the older V7 se
 | Average episode length    |   `554.33` |     `925.31` |
 | Final epsilon             |     `0.05` |       `0.05` |
 
+## Portfolio Assets
+
+The repo includes lightweight visual assets for GitHub:
+
+| Asset | Path |
+| ----- | ---- |
+| Pygame preview image | `assets/preview.png` |
+| Agent 1 training plots | `assets/plots/agent1/` |
+| Agent 2 training plots | `assets/plots/agent2/` |
+| Agent 1 vs newAgent comparison | `assets/plots/comparison/agent1_vs_newAgent/` |
+| Alpha curriculum plots | `assets/plots/alpha/` |
+
+Saved model checkpoints are produced inside each run folder, for example:
+
+```text
+data/training_runs/newAgent/checkpoints/final.pt
+data/training_runs/alpha/checkpoints/final.pt
+```
+
+The `data/` directory is intentionally used for generated local runs. For a public GitHub repo, keep the README plots in `assets/plots/` and optionally publish selected checkpoint files separately if they become too large.
+
 ## Output Data
 
 Every logged run creates a folder under:
@@ -377,7 +461,7 @@ Every logged run creates a folder under:
 data/training_runs/<run_name>/
 ```
 
-Example V12 training output:
+Example training output:
 
 ```text
 data/training_runs/run_YYYYMMDD_HHMMSS/
@@ -402,6 +486,26 @@ data/training_runs/run_YYYYMMDD_HHMMSS/
 ```
 
 `episodes.csv` includes episode length, winner, scores, goals, touches, kicks, steals, average distance to ball, total rewards, reward component totals, epsilon, and timestamp.
+
+## Architecture
+
+The detailed architecture note is in [ARCHITECTURE.md](ARCHITECTURE.md).
+
+```mermaid
+flowchart LR
+    A["Pygame modes<br/>main.py, demo.py, manual.py"] --> E["SoccerEnv"]
+    B["Training modes<br/>train.py, self_play.py"] --> E
+    C["2v2 baseline<br/>run_team_random.py"] --> T["TeamSoccerEnv"]
+    E --> P["Physics, rules, rewards, state"]
+    T --> P
+    B --> D["DQNAgent + replay buffer"]
+    E --> L["EpisodeLogger + Metrics"]
+    T --> L
+    L --> CSV["episodes.csv"]
+    CSV --> G["analysis/plot_*.py"]
+```
+
+The 1v1 environment is the main reinforcement learning target. It exposes a compact Gym-style API for training and a Pygame renderer for visual inspection. The 2v2 environment is currently a clean foundation with team-level rewards and baseline team agents.
 
 ## Reward Shaping V2
 
@@ -501,16 +605,34 @@ V10 expands the environment state from the original compact state to an 18-value
 
 `last_touch_owner` is encoded as `0`, `1`, or `2`. Because the DQN input size changed in V10, checkpoints from older state sizes should be retrained before use with the current model.
 
+## Learning Algorithm
+
+RLStriker uses Deep Q-Learning for the trainable 1v1 agent:
+
+| Piece | Implementation |
+| ----- | -------------- |
+| Q-network | `agents/model.py` |
+| Agent logic | `agents/dqn_agent.py` |
+| Replay memory | `agents/replay_buffer.py` |
+| Random baseline | `agents/random_agent.py` |
+| Checkpoint opponent | `agents/checkpoint_opponent.py` |
+
+At each step, the learner chooses a discrete action with epsilon-greedy exploration, stores the transition in replay memory, samples mini-batches, updates the Q-network with temporal-difference targets, and periodically syncs a target network. Checkpoints are saved as `.pt` files with metadata such as run name, episode, trained side, reward version, and state size.
+
+Self-play adds older checkpoints to the opponent pool so the learner faces stronger policies than pure random movement. Curriculum learning stages make the task easier at first by focusing on reaching the ball, pushing toward goal, scoring, weak opponents, and finally self-play-like pressure.
+
 ## Repository Structure
 
 ```text
 RLStriker/
+├── ARCHITECTURE.md
 ├── agents/
 │   ├── checkpoint_opponent.py
 │   ├── dqn_agent.py
 │   ├── model.py
 │   ├── random_agent.py
-│   └── replay_buffer.py
+│   ├── replay_buffer.py
+│   └── team_agent.py
 ├── env/
 │   ├── constants.py
 │   ├── entities.py
@@ -519,7 +641,8 @@ RLStriker/
 │   ├── rewards.py
 │   ├── rules.py
 │   ├── soccer_env.py
-│   └── state.py
+│   ├── state.py
+│   └── team_soccer_env.py
 ├── logging_utils/
 │   ├── episode_logger.py
 │   └── metrics.py
@@ -541,6 +664,7 @@ RLStriker/
 ├── main.py
 ├── manual.py
 ├── run_random.py
+├── run_team_random.py
 ├── self_play.py
 ├── train.py
 ├── requirements.txt
@@ -549,8 +673,14 @@ RLStriker/
 
 ## Development Roadmap
 
-- V15: Multi-agent 2v2 expansion
-- V16: Final portfolio polish
+The roadmap is complete through V16:
+
+- V1-V3: Pygame field, physics, rules, and Gym-style environment
+- V4-V8: Random agents, logging, rewards, DQN training, and graph generation
+- V9-V12: Curriculum learning, better state representation, self-play, and richer rewards
+- V13-V16: Demo mode, human-vs-AI mode, 2v2 team mode, and portfolio polish
+
+Good next research directions are stronger 2v2 learning, model evaluation tournaments, reward ablations, and longer curriculum/self-play runs.
 
 ## License
 
