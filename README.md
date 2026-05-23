@@ -314,20 +314,6 @@ Note: this is not a perfectly controlled A/B test. `agent1` used the older V7 se
 
 ![agent1 vs newAgent comparison dashboard](assets/plots/comparison/agent1_vs_newAgent/comparison_dashboard.png)
 
-### Individual Comparison Graphs
-
-| Metric           | Comparison graph                                                                                                          |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Rewards          | ![agent1 vs newAgent reward comparison](assets/plots/comparison/agent1_vs_newAgent/reward_comparison.png)                 |
-| Win Rate         | ![agent1 vs newAgent win rate comparison](assets/plots/comparison/agent1_vs_newAgent/winrate_comparison.png)              |
-| Goals            | ![agent1 vs newAgent goals comparison](assets/plots/comparison/agent1_vs_newAgent/goals_comparison.png)                   |
-| Ball Touches     | ![agent1 vs newAgent touches comparison](assets/plots/comparison/agent1_vs_newAgent/touches_comparison.png)               |
-| Connected Kicks  | ![agent1 vs newAgent kicks comparison](assets/plots/comparison/agent1_vs_newAgent/kicks_comparison.png)                   |
-| Steals           | ![agent1 vs newAgent steals comparison](assets/plots/comparison/agent1_vs_newAgent/steals_comparison.png)                 |
-| Distance to Ball | ![agent1 vs newAgent distance comparison](assets/plots/comparison/agent1_vs_newAgent/distance_to_ball_comparison.png)     |
-| Episode Length   | ![agent1 vs newAgent episode length comparison](assets/plots/comparison/agent1_vs_newAgent/episode_length_comparison.png) |
-| Epsilon Decay    | ![agent1 vs newAgent epsilon comparison](assets/plots/comparison/agent1_vs_newAgent/epsilon_comparison.png)               |
-
 ### Training Comparison
 
 `newAgent` gets much higher shaped reward under V12, but `agent1` still scored and won more often in the final 100 episodes. This suggests V12 changed the reward incentives substantially, but goal conversion still needs work.
