@@ -194,14 +194,14 @@ The demo overlay shows score, episode, step, cumulative rewards, last event, mod
 
 Useful demo options:
 
-| Option                  | Default | Description                                  |
-| ----------------------- | ------: | -------------------------------------------- |
-| `--checkpoint`          | newAgent final | Model checkpoint to watch              |
-| `--model-agent`         |     `1` | Side controlled by the model                 |
-| `--opponent`            | random  | Use `random` or `checkpoint` opponent        |
-| `--opponent-checkpoint` |    none | Checkpoint path for checkpoint opponent      |
-| `--episodes`            |   `100` | Number of demo episodes before exiting       |
-| `--fps`                 |    `60` | Playback speed                               |
+| Option                  |        Default | Description                             |
+| ----------------------- | -------------: | --------------------------------------- |
+| `--checkpoint`          | newAgent final | Model checkpoint to watch               |
+| `--model-agent`         |            `1` | Side controlled by the model            |
+| `--opponent`            |         random | Use `random` or `checkpoint` opponent   |
+| `--opponent-checkpoint` |           none | Checkpoint path for checkpoint opponent |
+| `--episodes`            |          `100` | Number of demo episodes before exiting  |
+| `--fps`                 |           `60` | Playback speed                          |
 
 ## Self-Play
 
@@ -215,13 +215,13 @@ This helps avoid training only against weak random behavior and starts pushing t
 
 Useful self-play options:
 
-| Option                    | Default | Description                                                |
-| ------------------------- | ------: | ---------------------------------------------------------- |
-| `--checkpoint-every`      |   `100` | Save regular learner checkpoints                           |
-| `--opponent-refresh-every`|   `250` | Add the current learner to the opponent pool every N episodes |
-| `--opponent-pool-size`    |     `8` | Maximum number of older checkpoint opponents to keep       |
-| `--random-opponent-prob`  |  `0.25` | Chance of using a random opponent instead of a checkpoint  |
-| `--initial-opponent`      |    none | Seed the pool with one or more compatible checkpoint files |
+| Option                     | Default | Description                                                   |
+| -------------------------- | ------: | ------------------------------------------------------------- |
+| `--checkpoint-every`       |   `100` | Save regular learner checkpoints                              |
+| `--opponent-refresh-every` |   `250` | Add the current learner to the opponent pool every N episodes |
+| `--opponent-pool-size`     |     `8` | Maximum number of older checkpoint opponents to keep          |
+| `--random-opponent-prob`   |  `0.25` | Chance of using a random opponent instead of a checkpoint     |
+| `--initial-opponent`       |    none | Seed the pool with one or more compatible checkpoint files    |
 
 Self-play checkpoints require the same state size as the current environment. V10+ runs use an 18-value state vector, so older 9-value checkpoints are skipped automatically.
 
@@ -243,34 +243,20 @@ Curriculum runs still write the same `episodes.csv`, checkpoints, and optional `
 
 The `alpha` run is a full curriculum training run using the V12 reward system and the V10 18-value state representation. It trained agent 1 for 5,000 episodes: 1,000 episodes in each curriculum stage.
 
-### Alpha Curriculum Dashboard
-
 ![Alpha curriculum dashboard](assets/plots/alpha/curriculum_dashboard.png)
-
-### Alpha Individual Plots
-
-| Metric           | Plot                                                                      |
-| ---------------- | ------------------------------------------------------------------------- |
-| Rewards          | ![Alpha reward plot](assets/plots/alpha/rewards.png)                      |
-| Win Rate         | ![Alpha win rate plot](assets/plots/alpha/winrate.png)                    |
-| Goals            | ![Alpha goals plot](assets/plots/alpha/goals.png)                         |
-| Ball Touches     | ![Alpha touches plot](assets/plots/alpha/touches.png)                     |
-| Distance to Ball | ![Alpha distance to ball plot](assets/plots/alpha/distance_to_ball.png)   |
-| Episode Length   | ![Alpha episode length plot](assets/plots/alpha/episode_length.png)       |
-| Epsilon Decay    | ![Alpha epsilon decay plot](assets/plots/alpha/epsilon.png)               |
 
 ### Alpha Final Performance
 
 In the final 100 episodes, alpha reached a much cleaner scoring rhythm:
 
-| Last 100 Episodes        | Alpha |
-| ------------------------ | ----: |
-| Agent 1 average reward   | `155.10` |
-| Agent 1 goals / episode  | `0.99` |
-| Agent 2 goals / episode  | `0.00` |
-| Agent 1 touches / episode| `1.68` |
-| Average episode length   | `138.5` |
-| Final epsilon            | `0.05` |
+| Last 100 Episodes         |    Alpha |
+| ------------------------- | -------: |
+| Agent 1 average reward    | `155.10` |
+| Agent 1 goals / episode   |   `0.99` |
+| Agent 2 goals / episode   |   `0.00` |
+| Agent 1 touches / episode |   `1.68` |
+| Average episode length    |  `138.5` |
+| Final epsilon             |   `0.05` |
 
 ## Training Graphs
 
@@ -330,33 +316,33 @@ Note: this is not a perfectly controlled A/B test. `agent1` used the older V7 se
 
 ### Individual Comparison Graphs
 
-| Metric           | Comparison graph                                                                                         |
-| ---------------- | -------------------------------------------------------------------------------------------------------- |
-| Rewards          | ![agent1 vs newAgent reward comparison](assets/plots/comparison/agent1_vs_newAgent/reward_comparison.png) |
-| Win Rate         | ![agent1 vs newAgent win rate comparison](assets/plots/comparison/agent1_vs_newAgent/winrate_comparison.png) |
-| Goals            | ![agent1 vs newAgent goals comparison](assets/plots/comparison/agent1_vs_newAgent/goals_comparison.png) |
-| Ball Touches     | ![agent1 vs newAgent touches comparison](assets/plots/comparison/agent1_vs_newAgent/touches_comparison.png) |
-| Connected Kicks  | ![agent1 vs newAgent kicks comparison](assets/plots/comparison/agent1_vs_newAgent/kicks_comparison.png) |
-| Steals           | ![agent1 vs newAgent steals comparison](assets/plots/comparison/agent1_vs_newAgent/steals_comparison.png) |
-| Distance to Ball | ![agent1 vs newAgent distance comparison](assets/plots/comparison/agent1_vs_newAgent/distance_to_ball_comparison.png) |
+| Metric           | Comparison graph                                                                                                          |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Rewards          | ![agent1 vs newAgent reward comparison](assets/plots/comparison/agent1_vs_newAgent/reward_comparison.png)                 |
+| Win Rate         | ![agent1 vs newAgent win rate comparison](assets/plots/comparison/agent1_vs_newAgent/winrate_comparison.png)              |
+| Goals            | ![agent1 vs newAgent goals comparison](assets/plots/comparison/agent1_vs_newAgent/goals_comparison.png)                   |
+| Ball Touches     | ![agent1 vs newAgent touches comparison](assets/plots/comparison/agent1_vs_newAgent/touches_comparison.png)               |
+| Connected Kicks  | ![agent1 vs newAgent kicks comparison](assets/plots/comparison/agent1_vs_newAgent/kicks_comparison.png)                   |
+| Steals           | ![agent1 vs newAgent steals comparison](assets/plots/comparison/agent1_vs_newAgent/steals_comparison.png)                 |
+| Distance to Ball | ![agent1 vs newAgent distance comparison](assets/plots/comparison/agent1_vs_newAgent/distance_to_ball_comparison.png)     |
 | Episode Length   | ![agent1 vs newAgent episode length comparison](assets/plots/comparison/agent1_vs_newAgent/episode_length_comparison.png) |
-| Epsilon Decay    | ![agent1 vs newAgent epsilon comparison](assets/plots/comparison/agent1_vs_newAgent/epsilon_comparison.png) |
+| Epsilon Decay    | ![agent1 vs newAgent epsilon comparison](assets/plots/comparison/agent1_vs_newAgent/epsilon_comparison.png)               |
 
 ### Training Comparison
 
 `newAgent` gets much higher shaped reward under V12, but `agent1` still scored and won more often in the final 100 episodes. This suggests V12 changed the reward incentives substantially, but goal conversion still needs work.
 
-| Last 100 Episodes                | agent1 run | newAgent run |
-| -------------------------------- | ---------: | -----------: |
-| Average reward                   |    `73.67` |     `158.11` |
-| Win rate                         |      `54%` |         `7%` |
-| Goals / episode                  |     `0.54` |       `0.07` |
-| Touches / episode                |     `1.65` |       `0.75` |
-| Connected kicks / episode        |     `0.06` |       `0.13` |
-| Steals / episode                 |     `0.01` |       `0.00` |
-| Average distance to ball         |   `171.94` |     `202.49` |
-| Average episode length           |   `554.33` |     `925.31` |
-| Final epsilon                    |     `0.05` |       `0.05` |
+| Last 100 Episodes         | agent1 run | newAgent run |
+| ------------------------- | ---------: | -----------: |
+| Average reward            |    `73.67` |     `158.11` |
+| Win rate                  |      `54%` |         `7%` |
+| Goals / episode           |     `0.54` |       `0.07` |
+| Touches / episode         |     `1.65` |       `0.75` |
+| Connected kicks / episode |     `0.06` |       `0.13` |
+| Steals / episode          |     `0.01` |       `0.00` |
+| Average distance to ball  |   `171.94` |     `202.49` |
+| Average episode length    |   `554.33` |     `925.31` |
+| Final epsilon             |     `0.05` |       `0.05` |
 
 ## Output Data
 
