@@ -292,19 +292,6 @@ Useful demo options:
 | `--episodes`            |          `100` | Number of demo episodes before exiting  |
 | `--fps`                 |           `60` | Playback speed                          |
 
-## Demo Video Guide
-
-For a short portfolio video, record one or more of these flows:
-
-```bash
-python main.py
-python demo.py --checkpoint data/training_runs/newAgent/checkpoints/final.pt
-python manual.py --difficulty strong
-python run_team_random.py --episodes 3 --render
-```
-
-A clear demo sequence is: show the manual sandbox, show a trained checkpoint in demo mode, show the generated training graphs, then show the 2v2 baseline mode. The Pygame title bar and overlays identify the project, score, rewards, episode, model, and FPS during visual playback.
-
 ## Self-Play
 
 V11 adds checkpoint-based self-play. The current learner periodically saves model snapshots, stores them in an opponent pool, and trains against a mix of:
@@ -431,27 +418,6 @@ Note: this is not a perfectly controlled A/B test. `agent1` used the older V7 se
 | Average distance to ball  |   `171.94` |     `202.49` |
 | Average episode length    |   `554.33` |     `925.31` |
 | Final epsilon             |     `0.05` |       `0.05` |
-
-## Portfolio Assets
-
-The repo includes lightweight visual assets for GitHub:
-
-| Asset | Path |
-| ----- | ---- |
-| Pygame preview image | `assets/preview.png` |
-| Agent 1 training plots | `assets/plots/agent1/` |
-| Agent 2 training plots | `assets/plots/agent2/` |
-| Agent 1 vs newAgent comparison | `assets/plots/comparison/agent1_vs_newAgent/` |
-| Alpha curriculum plots | `assets/plots/alpha/` |
-
-Saved model checkpoints are produced inside each run folder, for example:
-
-```text
-data/training_runs/newAgent/checkpoints/final.pt
-data/training_runs/alpha/checkpoints/final.pt
-```
-
-The `data/` directory is intentionally used for generated local runs. For a public GitHub repo, keep the README plots in `assets/plots/` and optionally publish selected checkpoint files separately if they become too large.
 
 ## Output Data
 
