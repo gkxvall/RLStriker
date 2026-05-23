@@ -6,6 +6,33 @@ The project is complete through **V16**, the final portfolio polish pass. It inc
 
 ![RLStriker Pygame preview](assets/preview.png)
 
+## Contents
+
+- [Current Features](#current-features)
+- [Project Status](#project-status)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Manual Play](#manual-play)
+- [Human vs AI](#human-vs-ai)
+- [Random Self-Play](#random-self-play)
+- [2v2 Team Mode](#2v2-team-mode)
+- [DQN Training](#dqn-training)
+- [Demo Mode](#demo-mode)
+- [Self-Play](#self-play)
+- [Curriculum Learning](#curriculum-learning)
+- [Alpha Curriculum Learning Plots](#alpha-curriculum-learning-plots)
+- [Training Graphs](#training-graphs)
+- [Training Run Visualizations](#training-run-visualizations)
+- [Output Data](#output-data)
+- [Architecture](#architecture)
+- [Reward Shaping V2](#reward-shaping-v2)
+- [Environment API](#environment-api)
+- [State Representation](#state-representation)
+- [Learning Algorithm](#learning-algorithm)
+- [Repository Structure](#repository-structure)
+- [Development Roadmap](#development-roadmap)
+- [License](#license)
+
 ## Current Features
 
 - Pygame soccer pitch with two players, one ball, and two goals
